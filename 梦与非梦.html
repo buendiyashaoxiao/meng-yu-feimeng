@@ -139,6 +139,9 @@ figcaption .tag{margin-left:0;margin-right:6px}
 .changes .chg b{margin-right:6px}
 .changes .chg p{margin:4px 0 0}
 .changes .cp b{color:var(--fict)}
+.redo-rows{margin-top:8px;font-family:var(--sans);font-size:14px}
+.redo-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:8px 0;border-top:1px solid var(--rule)}
+.redo-row span{flex:1 1 10em}
 .redo-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .redo-list .restart{margin-top:0;flex:1 1 9em}
 .redo-h{font-family:var(--sans);font-size:13px;color:var(--muted);margin:22px 0 0}
@@ -1178,7 +1181,15 @@ function simulate(pk, target){
     const pool = safe.length ? safe : ok; if(!pool.length) return false;
     let pick = pool[0];
     if(pk==="hist"){ const hx = HX[st.scene]; const h = hx && pool.find(o=>hx.h.includes(o.c.set)); if(h) pick = h; }
-    else { const k = P.ax; const sc2 = o => { const w = W(o.c.set); return (w[k]||0)*10 - (k==="ladder" ? 0 : (w.ladder||0)); };
+    else {
+      /* 主项优先，同时补最低的一项；前三幕“向上靠”跟不上进度时也要补，保证能进北京。 */
+      const k = P.ax, cur = {}; Object.keys(AX).forEach(x=>cur[x]=ax(x));
+      const low = Object.keys(AX).filter(x=>x!=="ladder" && x!==k).sort((a,b)=>cur[a]-cur[b])[0];
+      const needUp = st.act<=3 && cur.ladder < Math.min(P.up||10, Math.floor(st.log.length*0.42));
+      const sc2 = o => { const w = W(o.c.set); let v = 3*(w[k]||0) + 1.5*(w[low]||0);
+        Object.keys(AX).forEach(x=>{ if(x!==k && x!==low && x!=="ladder") v += 0.5*(w[x]||0); });
+        if(k!=="ladder") v += needUp ? 2.5*(w.ladder||0) : -0.3*(w.ladder||0);
+        return v; };
       pick = pool.slice().sort((a,b)=>sc2(b)-sc2(a))[0]; }
     const c = pick.c;
     if(c.set){ st.facts.push(c.set); const ti = typeof sc.title==="function"?sc.title():sc.title; const t = (typeof c.t==="function"?c.t():c.t).replace(/<[^>]+>/g,""); st.log.push({from:st.scene, set:c.set, t:t.length>34?t.slice(0,33)+"……":t, title:ti}); }
@@ -1186,6 +1197,25 @@ function simulate(pk, target){
     simAdvance(c.next);
   }
   return false;
+}
+/* 预览：每种人走到某一幕时四项分量是多少，会不会进北京。模拟完把原来的状态放回去。 */
+function presetPreview(act){
+  const keep = st, out = {};
+  Object.keys(PRESETS).forEach(k=>{ const ok = simulate(k, act); out[k] = ok ? {v:Object.keys(AX).map(x=>ax(x)), bj:(st.path||[]).includes("c10")} : null; });
+  st = keep; return out;
+}
+/* 选幕和选人的面板。fixedAct 有值时只能从那一幕开始（结局页“换一种人重来”用）。 */
+function presetPanel(box, fixedAct){
+  let act = fixedAct || 2;
+  const draw = () => {
+    const pv = presetPreview(act);
+    box.innerHTML = `<div class="panel startp">${fixedAct ? `<h3>从${ACTS[act].split(" · ")[0]}开头，换一种人重来</h3><p class="note-start">前面几幕的选择和四项分量都按你选的这种人重新算，这一局原来的选择不保留。</p>` : `<h3>从哪一幕开始</h3><div class="redo-list">${[2,3,4,5,6].map(a=>`<button class="tbtn" data-act="${a}" aria-pressed="${a===act}">${ACTS[a]}</button>`).join("")}</div>`}
+      <h3>前面几幕，你是什么样的人</h3><p class="note-start">选一种人，前面几幕按这种人的脾气替你选完。每一种都会照顾到别的几项，保证能走到你选的那一幕。</p>
+      <div class="choices">${Object.entries(PRESETS).map(([k,p])=>`<button class="choice" data-preset="${k}">${p.n}<span class="who" style="margin-top:4px">${p.d}</span>${pv[k]?`<span class="who">${Object.keys(AX).map((x,i)=>`${AX[x].n} ${pv[k].v[i]}`).join("　")}${act>=4?(pv[k].bj?"　进了北京":"　留在上海"):""}</span>`:""}</button>`).join("")}</div></div>`;
+    box.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>{ act=+b.dataset.act; draw(); });
+    box.querySelectorAll("[data-preset]").forEach(b=>b.onclick=()=>startFrom(b.dataset.preset, act));
+  };
+  draw();
 }
 function startFrom(pk, act){
   bumpDream();
@@ -4604,13 +4634,7 @@ function renderTitle(){
   document.getElementById("show-ach").onclick = ()=>{ tp.innerHTML = tp.dataset.k==="ach" ? "" : achPanel(); tp.dataset.k = tp.dataset.k==="ach" ? "" : "ach"; };
   document.getElementById("pick-act").onclick = ()=>{
     if(tp.dataset.k==="act"){ tp.innerHTML=""; tp.dataset.k=""; return; }
-    tp.dataset.k = "act";
-    tp.innerHTML = `<div class="panel startp"><h3>从哪一幕开始</h3><div class="redo-list">${[2,3,4,5,6].map(a=>`<button class="tbtn" data-act="${a}" aria-pressed="${a===2}">${ACTS[a]}</button>`).join("")}</div>
-      <h3>前面几幕，你是什么样的人</h3><p class="note-start">选一种人，前面几幕按这种人的脾气替你选完，四样分量也就有了起点。路线会跟着他的脾气走，比如一路心软的人，可能进不了北京。</p>
-      <div class="choices">${Object.entries(PRESETS).map(([k,p])=>`<button class="choice" data-preset="${k}">${p.n}<span class="who" style="margin-top:4px">${p.d}</span></button>`).join("")}</div></div>`;
-    let act = 2;
-    tp.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>{ act=+b.dataset.act; tp.querySelectorAll("[data-act]").forEach(x=>x.setAttribute("aria-pressed", x===b)); });
-    tp.querySelectorAll("[data-preset]").forEach(b=>b.onclick=()=>startFrom(b.dataset.preset, act));
+    tp.dataset.k = "act"; presetPanel(tp, null);
   };
   document.getElementById("start").onclick = startDream;
   const r = document.getElementById("resume");
@@ -4620,7 +4644,9 @@ function renderTitle(){
 function redoList(){
   const acts = Object.keys(st.cps||{}).map(Number).filter(a=>a>1 && a<7 && ACTS[a]).sort((a,b)=>a-b);
   if(!acts.length) return "";
-  return `<p class="redo-h">从这一局走过的某一幕开头再梦一次，前面几幕的选择都保留。</p><div class="redo-list">${acts.map(a=>`<button class="restart alt" data-redo="${a}" id="redo-${a}">${ACTS[a].split(" · ")[0]}<small style="display:block;font-size:12px;opacity:.75">${(t=>typeof t==="function"?t():t||"")((SC[st.cps[a].scene]||{}).title)}</small></button>`).join("")}</div>`;
+  const ti = a => (t=>typeof t==="function"?t():t||"")((SC[st.cps[a].scene]||{}).title);
+  return `<p class="redo-h">从这一局走过的某一幕开头再梦一次。“保留原来的”是这一局到那一幕为止的选择和分量都不变；“换一种人”是前面几幕按你新选的一种人重新算。</p>
+    <div class="redo-rows">${acts.map(a=>`<div class="redo-row"><span><b>${ACTS[a].split(" · ")[0]}</b>　${ti(a)}</span><button class="tbtn" data-redo="${a}" id="redo-${a}">保留原来的</button><button class="tbtn" data-repick="${a}">换一种人</button></div>`).join("")}</div><div id="repick-box"></div>`;
 }
 function renderEnd(){
   recordAch();
@@ -4654,7 +4680,7 @@ function renderEnd(){
     ${st.tab==='arch'?archivePanel():''}${st.tab==='gl'?glossPanel():''}${st.tab==='dr'?driftPanel():''}
     ${nxt && SC[nxt] ? `<button class="restart" id="next">下一幕　${E.nextLabel.replace(/^第.幕　/,"")}</button>` : (nxt ? `<p class="note-start">下一幕尚未制作。</p>` : st.scene==="end7" ? `` : `<p class="note-start">这一局的梦停在这里。</p>`)}
     ${redoList()}
-    <button class="restart ${nxt&&SC[nxt]?"alt":""}" id="again">再做一次梦</button>
+    <button class="restart ${nxt&&SC[nxt]?"alt":""}" id="again">从头再做一次梦<small style="display:block;font-size:12px;opacity:.75">从1966年6月开始，所有选择和分量清零</small></button>
   </div>`;
   app.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{ st.lens=b.dataset.k; save(); render(); });
   bindBar();
@@ -4662,6 +4688,7 @@ function renderEnd(){
   if(n) n.onclick=()=>{ st.lens="huang"; st.y77=false; go(nxt); };
   document.getElementById("again").onclick = startDream;
   app.querySelectorAll("[data-redo]").forEach(b=>b.onclick=()=>restartAct(+b.dataset.redo));
+  app.querySelectorAll("[data-repick]").forEach(b=>b.onclick=()=>{ const box = document.getElementById("repick-box"); presetPanel(box, +b.dataset.repick); box.scrollIntoView({block:"nearest"}); });
 }
 if(window.claude && window.claude.hot && window.claude.hot.snapshot){
   try{ window.claude.hot.snapshot(()=>({st})) }catch(e){}
