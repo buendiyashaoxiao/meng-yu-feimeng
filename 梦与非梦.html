@@ -1010,6 +1010,9 @@ const WCH = [
   {k:"commune", n:"巴黎公社原则落了地", hint:"第二幕改名那一天说不改，第三幕让上柴厂的人自己投票。",
    test:()=>has("no_rename") && any("ca_vote","ca_split"),
    d:()=>`上海的公社委员由工厂选举，可以罢免，这套办法在上海维持了${has("k2_from_split")?"十年":"三年"}。选出来的人后来慢慢换成了会跑关系的人，可罢免的规矩一直在。全国别的地方照样成立了革委会。`},
+  {k:"commune_army", n:"公社选过一回", hint:"改名那一天说不改，后来请部队进了厂。",
+   test:()=>has("no_rename") && has("ca_callarmy"),
+   d:()=>`1967年上海的公社委员由工厂选过一回。部队进厂以后，名单改由警备区报上来，1968年改称革委会。档案里多了一页，对抗主席指示。`},
   {k:"assoc", n:"结社自由", hint:"第一幕念宪法，第二幕把结社自由写进第一号通令，第三幕给要“第二次大乱”的组织盖章。",
    test:()=>has("cg_stamp"),
    d:()=>`上海的群众组织登记就合法，宗旨不审，动手的按刑法办。上柴那场武斗没有发生，打死解福喜的人按刑法判了刑。这份通令一年以后被废止。`},
@@ -1056,7 +1059,7 @@ const WCH = [
 const COUPLE = [
   {k:"ags_rec", need:["ags","reconcile"], n:"两派的老工人一起管厂", hint:"既要撕掉那条规章，又要一路留情。",
    d:()=>`十七厂的管理小组里，坐着原来工总司的人，也坐着原来赤卫队的老师傅。他们在会上吵，吵完了一起下车间修车。这在1970年的上海几乎找不到先例。`},
-  {k:"ags_com", need:["ags","commune"], n:"工人自治工厂", hint:"让工厂选公社委员，也让车间管自己的厂。",
+  {k:"ags_com", need:["ags","commune|commune_army"], n:"工人自治工厂", hint:"让工厂选公社委员，也让车间管自己的厂。",
    d:()=>`选出来的厂务委员按鞍钢宪法管厂，车间可以罢免他们。这就是讨论记录里说的“工人自治工厂”。它最难的地方，是选出来的人也会变成新的干部。`},
   {k:"open_learn", need:["open","learn"], n:"中美提早合作", hint:"1972年写那份报告，1973年派人出去学。",
    d:()=>`上海港比历史上早几年对美国商船开放，几百个上海工人在美国、日本的工厂里学开机器。这没有改变1976年10月的结局，可七十年代末的引进，起步的地方不一样了。中美建交仍然要等到1979年。`},
@@ -1070,7 +1073,7 @@ const COUPLE = [
    d:()=>`1976年10月那一周，去各厂劝人别上街的，是十年前在康平路被冲散的赤卫队员。`}
 ];
 const wchDone = () => WCH.filter(w=>{ try{ return w.test(); }catch(e){ return false; } });
-const coupleDone = (done) => COUPLE.filter(c=>c.need.every(k=>done.some(w=>w.k===k)));
+const coupleDone = (done) => COUPLE.filter(c=>c.need.every(k=>k.split("|").some(x=>done.some(w=>w.k===x))));
 function changesPanel(){
   const done = wchDone(), cp = coupleDone(done);
   if(!done.length) return `<div class="lens"><p>这一局里，历史的大方向和档案里写的一样。你改变的，是几个人记住你的方式。</p></div>`;
