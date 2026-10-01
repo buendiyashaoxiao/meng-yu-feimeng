@@ -142,6 +142,13 @@ figcaption .tag{margin-left:0;margin-right:6px}
 .world code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;letter-spacing:.03em;word-break:break-all;color:var(--ink);background:var(--paper);padding:6px 8px;border-radius:2px;user-select:all;max-width:100%}
 .world h4{font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--muted);margin:14px 0 4px}
 .world ul{margin:0;padding-left:1.2em}.world li{margin:.35em 0}
+.drift .dr-bar.rel{background:linear-gradient(90deg,var(--rule) 0 calc(50% - 1px),var(--muted) calc(50% - 1px) calc(50% + 1px),var(--rule) calc(50% + 1px))}
+.drift .dr-bar.rel span{background:var(--stamp)}
+.echo .e-rel{margin-top:4px;color:var(--muted)}
+.hint{margin-top:22px;border-left:3px solid var(--fict)}
+.hint ul{margin:6px 0 0;padding-left:1.2em;font-family:var(--sans);font-size:14px;line-height:1.8}
+.hint p{font-family:var(--sans);font-size:14px;line-height:1.8}
+.hint .disclaim{color:var(--fict);font-size:12.5px}
 .world .w2{border-top:1px solid var(--rule);padding-top:10px;margin-top:14px}
 .changes .cp b{color:var(--fict)}
 .redo-rows{margin-top:8px;font-family:var(--sans);font-size:14px}
@@ -1158,7 +1165,7 @@ function recordAch(){
   const keys = [];
   if(ENDINGS.some(e=>e.k===st.scene)) keys.push(st.scene);
   if(st.scene==="g1"){ keys.push(has("k2_from_drift") ? "fin_drift" : st.branch ? "fin_"+st.branch : "fin_hist"); }
-  if(String(st.scene).startsWith("z_")){ keys.push({z_hist:"fin_hist", z_k1:"fin_k1", z_k2:has("k2_from_drift")?"fin_drift":"fin_k2", z_k3:"fin_k3", z_k4:"fin_k4", z_k6:"fin_k6", z_k7:"fin_k7"}[st.scene]); }
+  if(String(st.scene).startsWith("z_")){ keys.push({z_hist:"fin_hist", z_k1:"fin_k1", z_k2:has("k2_from_drift")?"fin_drift":"fin_k2", z_k3:"fin_k3", z_k4:"fin_k4", z_k6:"fin_k6", z_k7:"fin_k7", z_hua:"fin_hua", z_co:"fin_co"}[st.scene]); }
   const done = wchDone();
   done.forEach(w=>keys.push("w_"+w.k));
   coupleDone(done).forEach(c=>keys.push("c_"+c.k));
@@ -1182,7 +1189,7 @@ function achPanel(){
   const n = ACH.length, total = ENDINGS.length + WCH.length + COUPLE.length;
   return `<div class="panel achp"><p class="dr-sum">已经达成 ${n} / ${total}。没有达成的，只给一句提示。</p>
     ${sect("结局", ENDINGS, "")}${sect("改变", WCH, "w_")}${sect("组合", COUPLE, "c_")}
-    ${dreamCount>=3 ? `<h3>梦里的路要什么</h3><ul class="ach">${DOOR_REQ.map(([a,b])=>`<li class="got"><b>${a}</b><span>${b}</span></li>`).join("")}</ul>` : `<p class="note-start">梦满三次以后，这里会写出梦里的几条路要攒够什么。</p>`}</div>`;
+    ${(dreamCount>=3 || (()=>{ try{ return localStorage.getItem("mfm-arrested"); }catch(e){ return null; } })()) ? `<h3>梦里的路要什么</h3><ul class="ach">${DOOR_REQ.map(([a,b])=>`<li class="got"><b>${a}</b><span>${b}</span></li>`).join("")}</ul>` : `<p class="note-start">梦满三次以后，这里会写出梦里的几条路要攒够什么。</p>`}</div>`;
 }
 
 /* ---------- 从某一幕开始 ----------
@@ -4543,7 +4550,7 @@ function reroute(key, from, to){
 }
 
 /* ---------- 门的条件 ---------- */
-const twGate = () => has("add_temp") && (ax("hand")>=3 || ax("voice")>=3 || has("p0_join"));
+const twGate = () => has("add_temp") && (ax("hand")>=3 || ax("voice")>=3);
 const qhGate = () => ax("hand")>=3 || any("talked","visit_hosp","lu_home");
 const tw2Gate = () => any("tw_quota","tw_list");
 const canNJ = () => ax("hand")>=5;
@@ -4554,7 +4561,6 @@ const agsLine = () => any("ags_real","ags_mix");
 
 /* ---------- 人物和词条 ---------- */
 Object.assign(GLOSS,{
-  sgf:{m:["沈根发"],t:"沈根发（虚构人物）",b:"国棉十七厂细纱车间的艺徒，宁波人，1957年十七岁，左手小拇指进厂第二个月被罗拉轧掉半截。那年五月，他和几个艺徒要去区里请愿，问车间里年轻的党员王洪文去不去。"},
   fsf:{m:["范师傅","范福林"],t:"范福林（虚构人物）",b:"一个临时工，1958年进厂，大家叫他范师傅。1966年11月在愚园路那间屋子里，他是来问工总司管不管临时工的人。1967年1月他又来问转正，那时候《紧急通告》正把这类要求定为经济主义。"},
   tmf:{m:["唐美芳"],t:"唐美芳（虚构人物）",b:"周月娥的女儿，1967年二十出头，在一家针织厂当外包工，干了四年。外包工不算厂里的人，工资由外包的单位发，厂里说退就退。"},
   djp:{m:["杜建平"],t:"杜建平（虚构人物）",b:"同济大学测量专业的学生，1967年二十岁。1966年底串联到西宁，在青海日报社住了一个月。他把青海省军区司令员刘贤权给中央的电报抄件缝在棉袄里子里，带回了上海。"},
@@ -4574,7 +4580,6 @@ Object.assign(GLOSS,{
 });
 rebuildGlist();
 Object.assign(CH,{
-  sgf:()=>[ has("p0_join") ? "一九五七年五月，你跟他一起去了区里，请愿书是你在路灯底下重抄的。" : has("p0_persuade") ? "一九五七年五月，你劝他回了车间，答应去找车间主任。车间主任研究的结果是照旧。" : has("p0_list") ? "一九五七年五月，你写的那份名单上，第一个名字是他。那年秋天他被调去了外地。" : "" ],
   tmf:()=>[ visited("b10t") ? "一九六七年一月，她跟着范福林来过劳动局。" : "", has("tw_keep") ? "这一局里，她进了针织厂的正式编制。" : has("tw_yield") ? "这一局里，她还是外包工。" : "" ],
   djp:()=>[ has("qh_zcq") ? "你托人把他带回来的抄件送到了北京。" : has("qh_keep") ? "你把他留在十七厂的宿舍里住了一个月。" : has("qh_back") ? "你叫他回学校去。" : "" ],
   zgq:()=>[ visited("c5m") ? "一九六七年八月，他陪你去见张春桥，路上问你，枪真的要发吗。" : "", has("mil_unit") ? "十七厂枪库的第二把钥匙在他手里。" : "", visited("k1c") ? "一九七六年十月九日夜里，是他来找你开武器库。" : "" ],
@@ -4587,9 +4592,6 @@ Object.assign(CH,{
 
 /* ---------- 回响和分量 ---------- */
 Object.assign(ECHO,{
-  p0_join:{fx:"区里的人收下了那张纸。那年夏天反右开始，厂里开会说有的党员立场不稳。你的档案袋里多了一页，参与闹事，经教育认识错误。九年以后工作队整你的材料，翻开的第一页就是它。", w:{voice:1,hand:1}},
-  p0_persuade:{fx:"车间主任答应研究，三个月以后，研究的结果是照旧。你的档案袋里多了一页，立场坚定，做了说服工作。沈根发后来见了你，不大说话了。", w:{ladder:1}},
-  p0_list:{fx:"名单交上去了。那年秋天，沈根发被调去了外地的一个厂。你的档案袋里什么也没有多，那一页进了他的档案袋。", w:{ladder:2}},
   tw_quota:{fx:"办法印出来了，标题是《关于本市长期临时工分批转为固定工的试行办法》。第一批名单要等车间选。张春桥在电话里说了一句，小王胆子不小。", w:{voice:1,hand:1}},
   tw_list:{fx:"登记表发了下去。收上来的表格摞在劳动局的走廊里，有半人高，没有人再动它。"},
   tw_drop:{fx:"通知照发了。人民广场上的人，后来散了，怎么散的，各有各的说法。范师傅没有再来。", w:{ladder:1}},
@@ -4648,7 +4650,6 @@ Object.assign(ECHO,{
   k7_note:{fx:"那一行字，审查组的人后来问过你两次，是什么意思。", w:{voice:1}}
 });
 Object.assign(HX,{
-  p3f:{h:[], say:"没有这一段。现有史料里没有王洪文1957年的记录，这一场整体是虚构，背景是史实。"},
   b10t:{h:["tw_drop"], say:"1月7日提出制止经济主义的正是王洪文。1月17日支农回沪的工人在人民广场静坐，被工总司软硬兼施压了下去。上海自己的转正办法，历史上没有。"},
   b14q:{h:[], say:"没有这一段。刘贤权的电报和二月二十三日的枪声都是史实，把电报抄件带回上海的学生是虚构的。"},
   b14t:{h:[], unk:true, say:"全红总1967年2月被取缔，各地头头被捕，贵州分团负责人萧碧璜判了二十年。上海有没有报过名单，没有找到记载。"},
@@ -4671,43 +4672,9 @@ Object.assign(HX,{
 });
 
 /* ---------- 第一幕 · 一九五七年（p3 里的闪回） ---------- */
-SC.p3.choices[0].t = "那天晚上你没睡着。你想起自己的档案袋。里面有一页纸，是九年前的。";
-SC.p3.choices[0].next = "p3f";
-SC.p3f = {
-  act:1, tl:0,
-  stamp:"1957年5月 · 回忆", place:"国棉十七厂 · 细纱车间",
-  title:"艺徒",
-  ctx:()=>`<h4>一九五七年的上海工厂</h4>
-<p>1956年下半年到1957年春天，全国有一万多工人罢工、请愿。上海轻纺系统53个公私合营厂，1834人因为工资福利罢工、怠工、请愿。1957年4月初到5月24日，上海职工罢工请愿闹事二百多起，涉及约240个单位、约一万人，5月一个月就有160多起；5月上旬艺徒罢工请愿一度很凶。上海市总工会的报告说，有些厂里群众自己组织起来，把党和干部撇在一边。<span class="tag hist">史实</span> 见沈志华《思考与选择》第六章第三节、第八章第二节（转述）。</p>
-<p>5月23日，时任上海市委书记的马天水在大会上说，任其发展下去，上海要大乱。十年以后，他和王洪文同坐在上海市革委会里。<span class="tag hist">史实</span> 见同书第八章第二节（转述）。</p>
-<p>1956年12月，刘少奇主持工人阶级问题小组，提出企业可以通过职工代表大会和管理委员会管理，说它“又是领导，又是监督，主要是监督”。这是党内自己的方案，比文革早十年，后来放下了。<span class="tag hist">史实</span> 见同书第六章第三节（转述）。</p>
-<h4>十年以后</h4>
-<p>1961至1963年上海精简职工三十一万多人，多是老工人，下放农场或者回乡。1967年1月，回流上海的有五六万人，要复工，要吃饭。十年前在车间里提出来的要求，到一月风暴里又被提了出来，这一回被叫作经济主义，而第一个提出要制止经济主义的工人头头，是王洪文。<span class="tag disp">解释</span> 精简与回流的数字见杨继绳《天地翻覆》第十一章（转述）。这一场的选择会在1967年1月的“紧急通告”和“临时工”两场里回来。</p>`,
-  text:()=>`
-<p class="aside">回忆。一九五七年五月，你二十一岁。</p>
-<p>保卫科的同事说工作队在整材料的时候，你想起了自己的档案袋。你没有见过它，可你知道里面有一页纸是一九五七年写的。写什么，看你那年做了什么。</p>
-<p>一九五六年你从部队复员，分到十七厂，在细纱车间跟着老师傅学保全。你是党员，车间里年纪轻的党员没有几个。第二年开春，厂里传开了一些消息，说哪个厂的工人为了工资停了车，哪个厂的学徒排着队去了区里。</p>
-<p>五月里的一天，下了中班，几个艺徒在车间后面的弄堂里等你。领头的叫沈根发，宁波人，十七岁，左手的小拇指少了半截，是进厂第二个月让罗拉轧掉的。他们学徒三年，一个月拿十几块津贴，跟师傅干一样的活。厂里说过要改，说了一年没改。</p>
-<p>他们明天要去区里请愿，写好了一张纸，字写得歪歪扭扭。沈根发把纸递给你，说，小王，你是党员，你说话他们听，你跟我们一道去。</p>
-<p>弄堂口的路灯底下，有人在抽烟，烟头一明一灭。车间支部书记那天下午找过你，说这几天要注意，有人在背后煽动，党员要站稳立场。他还说，带头的是哪几个，要心里有数。</p>
-<p>那一个春天，上海两百多个单位的工人上街请愿。后来这些事有了一个统一的叫法，闹事。闹事的人和劝人的人、写名单的人，名字都会进档案袋。</p>`,
-  choices:[
-    {t:"你劝他们回车间。你说你去找车间主任，三天以内给他们一个回话。", set:"p0_persuade",
-     a66:"1957年5月　做艺徒思想工作，劝其复工。", a77:null, next:"p4"},
-    {t:"你把那张纸拿过来，在路灯底下重抄了一遍。第二天，你跟他们一道去了区里。", set:"p0_join",
-     a66:"1957年5月　曾支持艺徒的正当要求。", a77:"1957年5月　参与聚众闹事，一贯对党不满。", next:"p4"},
-    {t:"第二天，支部书记要一份带头人的名单。你写了，第一个名字是沈根发。", set:"p0_list",
-     a66:"1957年5月　协助车间支部做好艺徒闹事的善后工作。", a77:null, next:"p4"}
-  ],
-  src:`<p><span class="tag hist">史实</span> 1957年4月初到5月24日，上海职工罢工请愿闹事二百多起，涉及约240个单位、约一万人；5月上旬艺徒罢工请愿一度很凶；马天水5月23日说任其发展下去上海要大乱。见沈志华《思考与选择》第八章第二节（转述）。</p>
-<p><span class="tag hist">史实</span> 王洪文1956年复员，进国棉十七厂。见维基〈王洪文〉。</p>
-<p><span class="tag fict">虚构</span> 沈根发和这一夜的事为游戏演绎。现有史料里没有王洪文1957年的记录。艺徒津贴的数目只取大概，以沈著和杨继绳《天地翻覆》第十一章的叙述为准。</p>`
-};
-{ const t = SC.p4.text; SC.p4.text = () => `<p>天快亮的时候，你从九年前回到这间宿舍。${has("p0_join")?"那一页纸现在在工作队的人手里。":has("p0_list")?"这一回，要进名单的人是你。":"九年前你说三天以内给回话，那个回话一直没有来。"}你决定去北京。</p>` + t(); }
 { const t = SC.b11.text; SC.b11.text = () => {
     let s = t();
     if(twGate()) s = s.replace("范师傅后来没有再来。", "范师傅过了几天又来了。");
-    if(has("p0_join")) s += `<p>马天水临走的时候多看了你一眼，说，你是十七厂的。一九五七年五月，他在一个大会上说过，任其发展下去，上海要大乱。那个月十七厂去区里请愿的人里，有你。</p>`;
     return s; }; }
 
 /* ---------- 第二幕 · 临时工、电报、名单 ---------- */
@@ -4725,7 +4692,6 @@ SC.b10t = {
 <p>一月十七日，人民广场上坐满了人。坐着的是一九六一年到一九六三年精简下去的老工人，从外地回来，要复工，要吃饭。有人在广场上过了夜，身子底下铺着草席。总部的人说，这些人背后有人挑动，要劝回去，劝不回去就要采取措施。</p>
 <p>前几天，劳动局的一个科长来找过你。他拿着一份油印的东西，是全国红色劳动者造反总团上海分团送来的，说是从昆明翻印过来的《联合通告》，劳动部和全国总工会都签了字，文革中不得无故解雇临时工、合同工。科长说，北京已经说这份东西作废了，可下面的人不信，天天来局里问，局里没有人敢表态。他说，你们工总司说一句，比我们管用。</p>
 <p>范师傅也来了，他叫范福林。他把棉帽子攥在手里，说，我九年临时工，我不要补钱，我就要一个名字写在正式工的册子上。他身后跟着一个二十出头的姑娘，是一家针织厂的外包工，干了四年。她说她叫唐美芳，她妈妈是国棉厂的挡车工，叫周月娥。${has("talked")?"你想起安亭那列车上下来问话的女工。":""}</p>
-${visited("p3f")?`<p>沈根发也坐在广场上，身子底下垫着草席，旁边放着一只网线袋。他对来劝的人说，十年前他们说研究研究，这回又说运动后期。</p>`:""}
 <p>局里拿得出来的东西，只有一沓登记表，和一笔冻结着的流动资金。</p>`,
   choices:[
     {t:"照中央的通知办。临时工的问题，运动后期处理。", set:"tw_drop",
@@ -4843,7 +4809,7 @@ SC.c5q = {
 <p>一九六八年夏天，上海的每个单位都成立了专案组。隔离审查的人关在厂里的仓库、学校的教室、机关的地下室。下面的人传说，上面有一个比例。</p>
 <p>市革委会专案组的一份简报送到你桌上。某区一所中学的语文老师，审查第九天死了。简报上写，畏罪自杀。底下一行小字，审查材料三页，两页是学生的揭发，一页是他一九五七年的鉴定。</p>
 <p>徐景贤分管这一摊。他跟你说，清队是主席亲自抓的，进度要跟上，北京天天要数字。</p>
-<p>你想起一九六六年夏天，工作队把材料装进档案袋，本人一辈子看不到。${has("p0_list")?"你也想起一九五七年你交上去的那份名单。":""}</p>`,
+<p>你想起一九六六年夏天，工作队把材料装进档案袋，本人一辈子看不到。</p>`,
   choices:()=>[
     {t:"你说这一摊归徐景贤管，你不过问。", set:"qd_skip",
      a66:null, a77:"1968年　参与清理阶级队伍，制造冤假错案。", next: has("nj_both") ? "c5b" : "c5g"},
@@ -5169,7 +5135,7 @@ SC.k7b = {
 <p>十月六日晚上，你在工会大楼里开各省筹备组的会。会开到九点，有人进来，在你耳边说了一句话。</p>
 <p>江青、张春桥、姚文元在怀仁堂被抓了。电话打到工会，叫你待在原地，哪里也不要去。</p>
 <p>会议室里的人还没有散。湖南来的人看着你，广西来的人也看着你。${has("gh_ld")?"空了半年的广西筹备组组长，上个月才选出来，坐在最后一排。":""}</p>
-<p>${has("p0_join")?"你想起一九五七年，沈根发在弄堂口等你，手里拿着那张歪歪扭扭的纸。":"你想起一九六六年十一月，愚园路那间屋子，十几个人，十几家厂。"}</p>
+<p>你想起一九六六年十一月，愚园路那间屋子，十几个人，十几家厂。</p>
 <p>十月七日早上，来了两辆车。带你走的人说，王洪文同志，请你到西山去住一段时间，把问题说清楚。</p>`,
   choices:[
     {t:"你把会议记录交给秘书，跟他们走了。", set:"k7_wait", a66:null, a77:"1976年10月　隔离审查。", next:"z_k7"},
@@ -5474,7 +5440,6 @@ function worldOneLine(w){
 }
 /* 这一局留下了什么。按时间顺序，最多五条。h 是历史大势里的“遗产”，w 是继续革命世界里的“制度”。 */
 const WLEGACY = [
-  [()=>has("p0_join"), "一九五七年你跟艺徒去过区里。这件事只写在一九七七年的档案里，罪名是一贯对党不满。", "一九五七年你跟艺徒去过区里。现在有人拿这件事说你从来就站在工人一边，也有人拿它说你从来就不守规矩。"],
   [()=>has("lead_col"), "工总司当年没有司令，几家厂轮流主持。这个办法只用了几个月，记得的人不多。", "工总司当年没有司令。上海的工人代表会到现在还是轮流主持。"],
   [()=>has("tw_keep"), "上海有几万长期临时工在一九六七年以后陆续转了正。一九七七年清查时，有人说那是经济主义，可没有人把他们退回去。", "上海的长期临时工十一年前分批转了正。现在他们也是二级工，也在等调资。"],
   [()=>has("elect") && any("no_rename","ca_vote"), "上海人民公社的选举办法在档案里留了一页，罪名是对抗主席指示。", "公社式的选举在上海留了下来，选出来的人可以罢免。"],
@@ -5506,7 +5471,6 @@ function worldPeopleLines(w){
   if(visited("b14q")) L.push(["杜建平", has("qh_zcq") ? "他毕业以后，自己要求分到了西宁。" : has("qh_keep") ? "他在十七厂住过一个月，后来回了同济。" : "他回了学校。"]);
   if(visited("c6b")) L.push(["严志诚", has("ags_tech") ? (W ? "他是十七厂的总工程师，每个月列席厂务会。" : "他考上了一九七八年的研究生。") : has("ags_shame") ? "他在仓库里管了七年，一九七八年落实政策，回了技术科。" : "他还在技术科。"]);
   if(visited("c5m")) L.push(["朱国强", has("mil_unit") ? "他手里还拿着枪库的第二把钥匙。" : "他是十七厂的民兵连长。"]);
-  if(visited("p3f")) L.push(["沈根发", has("p0_join") ? "他是细纱车间的老保全了，见了人就说，一九五七年小王跟我们一道去过区里。" : has("p0_list") ? "他一九五七年被调去了外地，没有再回上海。" : "他还在细纱车间。"]);
   return L.slice(0,5);
 }
 function worldPart2(w){
@@ -5575,27 +5539,6 @@ ENDS.w = ENDW;
 
 /* ================= 1.4 · 一九五七年的回响、历史照片 ================= */
 
-/* ---------- 沈根发在一九六七年 ---------- */
-{ const t = SC.b10.text; SC.b10.text = () => {
-    let s = t();
-    if(!visited("p3f")) return s;
-    const v = has("p0_join") ? "他看见你，笑了一下，说，小王，五七年那回，你是跟我们一道去的。"
-      : has("p0_persuade") ? "他看见你，说，五七年你讲去找车间主任，三天以内给回话。这回呢。"
-      : "他看见你，没有说话，把手里的号码牌攥紧了。你写的那份名单上，第一个名字是他。";
-    const add = `<p>队伍后头还有一个人，你也认得。沈根发，十年前细纱车间的艺徒，左手的小拇指少半截。${has("p0_list")?"一九五七年秋天他被调去了外地，":""}一九六二年精简，他被下放到苏北的农场，前些天跟着几万个回上海的人一起回来了，要回厂。${v}</p>
-<p>十年前他要的是学徒的津贴，今天要的是回厂。要的人还是他，坐在桌子后面听的人换成了你。</p>`;
-    return s.replace("现在他想问问，转正的事能不能办。</p>", "现在他想问问，转正的事能不能办。</p>" + add);
-  }; }
-{ const t = SC.b15.text; SC.b15.text = () => (has("tw_yield") && visited("p3f") ? `<p>名单报上去的那天，你翻了一遍。回沪的人里有不少加入了全红总的上海分团，第二页上有沈根发。${has("p0_list")?"十年里第二次，你交上去的名单上有他。":""}</p>` : has("tw_keep") && visited("p3f") ? `<p>沈根发回了十七厂，又从细纱车间的保全学起。他四十岁了，跟一群十七八岁的学徒排在一起领工具。</p>` : ``) + t(); }
-Object.assign(CH,{
-  sgf:()=>[
-    has("p0_join") ? "一九五七年五月，你跟他一起去了区里，请愿书是你在路灯底下重抄的。" : has("p0_persuade") ? "一九五七年五月，你劝他回了车间，答应去找车间主任。车间主任研究的结果是照旧。" : has("p0_list") ? "一九五七年五月，你写的那份名单上，第一个名字是他。那年秋天他被调去了外地。" : "",
-    visited("b10") ? "一九六七年一月，他从苏北农场回到上海，排在工总司门口要回厂。" : "",
-    has("tw_keep") ? "这一局里，他回了十七厂。" : has("tw_yield") ? "一九六七年二月，你交上去的名单上有他。" : ""
-  ]
-});
-WLEGACY.unshift([()=>has("p0_list"), "一九五七年你交过一份名单，第一个名字是沈根发。那一页不在你的档案里，在他的档案里。", "一九五七年你交过一份名单，第一个名字是沈根发。现在有人要查五七年的账，那一页会被翻出来。"]);
-{ const f = worldPeopleLines; worldPeopleLines = w => f(w).map(([n,t]) => n==="沈根发" ? [n, has("tw_keep") ? "他一九六七年回了十七厂，又从保全学起，现在是细纱车间的老师傅。" : has("p0_list") ? "他一九五七年被调去外地，一九六二年下放苏北，没有再回十七厂。" : "他一九六二年下放苏北，一九六七年回来要过一次厂，没有要成。"] : [n,t]); }
 
 /* ---------- 历史照片 ----------
    全部来自维基共享资源，公有领域或 CC BY-SA，压缩后内嵌在页面里，离线也能看。来源和许可写在图注里。 */
@@ -5617,6 +5560,511 @@ function actCover(sc){
   const [no, name] = (ACTS[sc.act]||"").split(" · ");
   return `<div class="actcover"><img src="${p.src}" alt="${p.alt}"><div class="ac-txt"><span>${no}</span><b>${name}</b></div><small>${p.cap}${p.credit}</small></div>`;
 }
+
+/* ================= 1.5 · 关系、一九七六年十月的几种结果、台上的世界线 =================
+   “四人帮”不再是固定的四个人。王洪文跟几方面的关系分开记，1976年10月6日那天晚上抓了谁，由这些关系算出来。 */
+
+/* ---------- 关系 ----------
+   jq 江青，zcq 张春桥，hua 华国锋，lao 邓小平和老干部，mao 主席，base 造反派的基本盘。
+   前五项是跟谁近，最后一项是下面的人还跟不跟你。数值可正可负。 */
+const REL = {
+  jq:{n:"江青", d:"跟江青走得多近。去钓鱼台开会、去长沙、设值班室，都把你跟她绑在一起。1976年10月抓谁，先看这一项。"},
+  zcq:{n:"张春桥", d:"张春桥是把你带出来的人。跟他近，上海的事好办；可他跟江青绑得越紧，你也越难脱身。"},
+  hua:{n:"华国锋", d:"1976年主持中央工作的人。他说话慢，记性好。毛泽东去世以后，你站不站在他一边，他都记着。"},
+  lao:{n:"老干部", d:"邓小平、叶剑英和被打倒过又回来的那些人。跟他们近，造反派会说你变了。"},
+  mao:{n:"主席", d:"主席的态度。它跟着年份变，1967年他要工人阶级内部团结，1974年要你跟邓小平搞好团结，1976年又要反击右倾翻案风。"},
+  base:{n:"基本盘", d:"上海的造反派还跟不跟你。护着对手、跟老干部走、放人，都会耗掉一些。1976年10月，基本盘决定上海有没有人听你的。"}
+};
+const RELW = {
+  deal:{zcq:2}, on_stage:{zcq:1}, hard:{base:1}, cite_const:{mao:1}, go_back:{base:-1}, stay_all:{base:1}, took_own:{base:-1}, ks_stay:{base:1},
+  in_paper:{base:1}, talk_cwd:{base:-1}, shout_bh:{base:1}, kp_site:{base:1,lao:-1}, kp_talk:{base:-1}, visit_hosp:{lao:1}, smash:{base:2,lao:-1},
+  sign_order:{base:1}, law_order:{lao:1}, let_north:{base:-1}, hat:{lao:1,base:-1}, read:{zcq:1,lao:-1}, sign_notice:{zcq:1,mao:1}, add_temp:{base:1},
+  seize_joint:{zcq:1}, to_mill:{lao:1}, elect:{zcq:-1,base:1}, negotiate:{zcq:1}, seat_cwd:{base:-2}, block_hg:{zcq:2}, hold_hq:{zcq:-1}, rename:{zcq:1,mao:1},
+  tw_quota:{base:2}, tw_keep:{zcq:-2,base:1}, tw_yield:{zcq:1,base:-2}, tw_drop:{zcq:1,mao:1}, qh_zcq:{zcq:1,lao:-1},
+  geng_huang:{zcq:1,base:-1}, fan_arrest:{zcq:1,base:-1}, fan_open:{base:1}, fan_accept:{base:1}, ls_rally:{zcq:1}, ls_smash:{base:1,lao:-1}, ls_talk:{base:-1},
+  protect:{base:-1,lao:1}, watch:{base:1}, mil_hq:{base:2,zcq:1}, mil_unit:{base:1}, nj_both:{mao:2,zcq:-1,base:-1}, nj_zcq:{zcq:1},
+  qd_rules:{lao:1,base:-1}, qd_quota:{zcq:1,mao:1}, take_gifts:{base:-1}, a6_refuse:{base:1}, ags_real:{base:1}, ags_mix:{base:-1,lao:1}, ags_tech:{lao:1},
+  ags_shame:{base:1,lao:-1}, ll_report:{mao:1}, sh_open:{lao:1,jq:-1}, imp_learn:{lao:1,jq:-1},
+  lpz_warn:{mao:1}, a6_propose:{base:1}, tj_blank:{jq:1,base:1}, tj_exam:{jq:-1,lao:1}, jd_horn:{jq:1,base:2,lao:-2}, jd_files:{base:1,lao:1},
+  jd_both:{lao:2,base:-1,jq:-1}, hm_list:{lao:-2,base:1,jq:1}, hm_stop:{mao:1,lao:1}, fl_burn:{base:2}, fl_seal:{lao:1,base:-1}, fl_keep:{base:-2},
+  zj_call:{mao:1}, zj_back:{jq:1,base:1,lao:-1}, zj_jail:{lao:2,base:-2}, go_jq:{jq:3,mao:-1}, go_zcq:{zcq:2,jq:1}, go_zel:{lao:2,jq:-2},
+  cs_lushan:{jq:2,mao:-2}, cs_mild:{jq:1,mao:-1}, cs_skip:{jq:-3,lao:1,mao:1}, lyz_debate:{jq:-1}, b2_coop:{lao:3,jq:-3,base:-2,mao:1},
+  db_hard:{lao:1,base:-2}, db_soft:{base:1}, db_sign:{lao:1,base:-2}, db_case:{base:1}, db_refuse:{lao:-2,base:1}, zd_dhd:{lao:1,base:1},
+  zd_accept:{lao:1,base:-1}, zd_refuse:{jq:1,lao:-1}, jy_draft:{mao:2,lao:1,jq:-1}, da_pin:{jq:-1}, k7_go:{lao:1,jq:-2},
+  mil_up:{base:2,zcq:1,lao:-1}, mil_down:{base:-1,lao:1,hua:1}, sw_hist:{mao:2,hua:1,jq:1}, sw_soft:{mao:-1,lao:1}, sw_go:{mao:-3,lao:2,jq:-2},
+  duty_room:{jq:2,zcq:1,hua:-3}, no_duty:{hua:2,jq:-1}, ea_speak:{mao:-2,lao:2},
+  e3_jq:{jq:2,zcq:1,hua:-2}, e3_hua:{hua:3,jq:-3,zcq:-1,base:-2}, e3_split:{zcq:1,jq:-1,hua:1}, e3_sh:{base:2,hua:-1},
+  e6_list:{hua:2,base:-3}, e6_cover:{base:1,hua:-1}, e6_stay:{hua:1,base:-2}
+};
+const rel = k => st.facts.reduce((s,f)=>s+((RELW[f]||{})[k]||0),0);
+Object.assign(GLOSS, Object.fromEntries(Object.keys(REL).map(k=>["rel_"+k,{m:[],t:REL[k].n,b:REL[k].d+"　这一项是游戏里的累积关系，历史上没有这样的计分。"}])));
+const relLink = k => `<button type="button" class="g" data-g="rel_${k}">${REL[k].n}</button>`;
+{ const old = echoBox; echoBox = function(){
+    let h = old(); const L = st.last; if(!L || L.to!==st.scene || !RELW[L.set]) return h;
+    const r = Object.entries(RELW[L.set]).map(([k,v])=>`<span class="e-ax">${relLink(k)} ${v>0?"+":""}${v}<i>${rel(k)}</i></span>`).join("");
+    const box = `<div class="e-w e-rel">${r}</div>`;
+    return h ? h.replace(/<\/div>$/, box+"</div>") : `<div class="echo"><div class="e-you">上一步　${L.t}</div>${box}</div>`;
+  }; }
+{ const old = driftPanel; driftPanel = function(){
+    const rows = Object.keys(REL).map(k=>{ const v = rel(k); return `<div class="dr-row"><b>${relLink(k)}</b><span class="dr-bar rel"><span style="left:${v<0?50+Math.max(-50,v*4):50}%;width:${Math.min(50,Math.abs(v)*4)}%"></span></span><em>${v}</em><p>${REL[k].d}</p></div>`; }).join("");
+    return old().replace(`<ul class="dr-log">`, `<h3 style="margin-top:18px">跟谁走得近</h3>${rows}<ul class="dr-log">`);
+  }; }
+
+/* ---------- 1976年10月6日，名单上有没有你 ----------
+   主席1974年当面点过“四人帮”的（去江青那里、去长沙），起点就高。值班室、九月里站在江青一边，是最后几步。 */
+function oct6(){
+  const named = any("go_jq","cs_lushan","cs_mild");
+  const score = 2*rel("jq") + (named?3:0) + (has("duty_room")?4:0) - 2*rel("hua") - rel("lao") - (rel("mao")>=4?1:0);
+  const wang = has("duty_room") || has("e3_jq") || score >= 1;
+  const zhang = !(has("e3_split") && rel("zcq")>=4 && rel("hua")>=2 && !has("duty_room"));
+  return {wang, zhang, score};
+}
+
+/* ---------- 九月：按既定方针办 ---------- */
+reroute("e3","e4","e3b");
+SC.e3b = {
+  act:5, tl:3, tone:"0",
+  stamp:"1976年9月12日至10月4日", place:"北京 · 中南海 · 钓鱼台",
+  title:"按既定方针办",
+  ctx:()=>`<h4>毛泽东去世以后的二十七天</h4>
+<p>9月16日，两报一刊社论引了一句“按既定方针办”，说是毛泽东的临终嘱咐。华国锋后来说，毛泽东写给他的是“照过去方针办”，“按既定方针办”是篡改。9月29日的政治局会议上，江青提出要安排她的工作，又要毛远新留在北京处理毛泽东的文件，华国锋、叶剑英主张毛远新回辽宁，争到深夜。10月4日《光明日报》登出梁效的文章《永远按毛主席的既定方针办》。<span class="tag hist">史实</span> 见维基〈粉碎四人帮〉（搜索摘要）。</p>
+<p>这些天里，叶剑英见了很多人，汪东兴手下的中央警卫团归他直接调动。这些事当时在中南海里只是零星的传闻。<span class="tag disp">有争议</span> 叶剑英、华国锋、汪东兴三人谁先提出抓人，各家回忆不一。</p>
+<p>“四人帮”是毛泽东1974年至1975年几次批评时说出来的。到1976年10月，它变成了一张抓人的名单。<span class="tag disp">解释</span></p>`,
+  text:()=>`
+<p>主席的追悼会开过以后，中南海安静得有些奇怪。</p>
+<p>九月十六日，报上的社论引了一句“按既定方针办”。华国锋在一次会后跟你说，主席写给他的是“照过去方针办”，几个字不一样。他说完就走了，没有等你回答。</p>
+<p>你听说叶剑英这些天见了很多人，去过华国锋那里，也去过几位老帅那里。中央警卫团换了一次岗，换上来的都是你不认识的人。${has("duty_room")?"值班室的电话打出去，有几个省没有回话。":"你没有设值班室。各省的电话，还是打到中央办公厅。"}</p>
+<p>九月二十九日，政治局开会。江青说要安排她的工作，又说毛远新要留在北京，帮着整理主席的文件。华国锋说毛远新应该回辽宁。叶剑英没怎么说话。会开到半夜，张春桥在桌子底下碰了碰你的脚。</p>
+<p>${rel("base")>=6?"上海那边一天打来几个电话，问北京怎么样了。马天水说，下面的人都在等你一句话。":"上海那边打来的电话少了。有人说，工总司的老兄弟现在不大提你了。"}</p>`,
+  choices:()=>[
+    {t:"你说毛远新留在北京有道理，主席的文件要有熟悉情况的人整理。江青看了你一眼，点了点头。", set:"e3_jq",
+     a66:"1976年9月　在政治局会议上发言。", a77:"1976年9月29日　在政治局会议上与江青、张春桥一唱一和，妄图篡党夺权。", next:"e4"},
+    {t:"你说主席生前定了由华国锋同志主持中央工作，毛远新的事听华国锋同志的。散会的时候，张春桥没有跟你一起走。", set:"e3_hua",
+     a66:"1976年9月　在政治局会议上支持华国锋同志。", a77:"1976年9月　在政治局会议上见风使舵。", next:"e4"},
+    {t:"会上你没有说话。散会以后，你跟着张春桥去了他那里，劝他跟江青分开，说主席去世了，她撑不住，你们犯不着跟她一起。", set:"e3_split",
+     a66:null, a77:"1976年9月　与张春桥密谋。", next:"e4"},
+    {t:"你请了假，回上海住了五天。你去看了民兵的仓库，见了马天水、王秀珍、黄金海，跟他们说，北京的事你们别管，上海要稳住。", set:"e3_sh",
+     a66:"1976年9月　回上海检查工作。", a77:"1976年9月　回上海部署，准备武装叛乱。", next:"e4"}
+  ],
+  src:`<p><span class="tag hist">史实</span> 9月16日社论“按既定方针办”；华国锋指出毛泽东手书为“照过去方针办”；9月29日政治局会议争论毛远新去留与江青的工作安排；10月4日《光明日报》梁效文章。见维基〈粉碎四人帮〉（搜索摘要）。王洪文在9月29日会上的发言没有找到可靠记载。</p>
+<p><span class="tag fict">虚构</span> 四个选项都是游戏设定。</p>`
+};
+Object.assign(ECHO,{
+  e3_jq:{fx:"会开到凌晨两点，没有结果。第二天，华国锋在走廊里碰见你，点了点头。"},
+  e3_hua:{fx:"散会的时候，叶剑英从你身边走过，说了一句，小王，辛苦了。张春桥那天晚上没有给你打电话。上海有人说你见风使舵。"},
+  e3_split:{fx:"张春桥听你说完，很久没有说话。最后他说，你还年轻。你不知道这是答应了，还是没有。"},
+  e3_sh:{fx:"上海的老兄弟见到你，都松了一口气。你回北京的那天，中央警卫团又换了一次岗。"},
+  e6_list:{fx:"名单交上去了，有一百多个名字。北京说你立了功。上海的老兄弟从此不跟你说话。"},
+  e6_cover:{fx:"上海那一周没有人上街。北京没有完全照你的话办，清查还是来了，只是比历史上轻一些。"},
+  e6_stay:{fx:"你没有去上海。马天水他们从北京回去，在锦江小礼堂传达，下面的人有人哭了。"},
+  warn_zcq:{fx:"这一局从这里离开了历史。"},
+  wait_hrt:{fx:"你看见了门那边的事。"}
+});
+Object.assign(HX,{
+  e3b:{h:["e3_jq"], disp:true, say:"9月29日的政治局会议上，江青、张春桥、王洪文、姚文元一方主张毛远新留京，华国锋、叶剑英一方主张他回辽宁。王洪文具体说了什么，没有找到可靠的记载。"}
+});
+
+/* ---------- 十月六日：按名单分开 ---------- */
+{ const t = SC.e4.text; SC.e4.text = () => {
+    const o = oct6();
+    if(o.wang) return t();
+    return `
+<p>十月初，廖祖康请假回上海结婚了。你批的假。</p>
+<p>五日晚上，汪东兴来了一趟，坐了二十分钟，说的都是纪念堂的事。临走的时候他站在门口，说，明天晚上怀仁堂开常委会，你七点半到，从东门进，先到东边的休息室等着。他看着你，又说了一遍，东边的休息室。</p>
+<p>六日下午，中央办公厅的通知到了，说今晚八点在怀仁堂开会，审议毛选第五卷的清样。</p>
+<p>${o.zhang?"你知道张春桥也接到了同样的通知。他会从正门进去。":"你给张春桥打了个电话。他说，汪东兴也来找过他了，叫他从东门进。电话那头停了一下，他说，江青那边，我没有打电话。"}</p>
+<p>晚上七点，车在楼下等你。</p>`;
+  }; }
+{ const cf = SC.e4.choices; SC.e4.choices = () => {
+    const o = oct6();
+    if(o.wang) return cf();
+    return [
+      {t:"你提着文件包下了楼，从东门进了怀仁堂，在东边的休息室里坐下。", set:"wait_hrt", a66:null, a77:null, next:"e5w"},
+      ...(o.zhang ? [{grown:true, t:"你拿起电话，要了张春桥家。你跟他说，今晚的会，你别去。", set:"warn_zcq", a66:null, a77:"1976年10月6日　通风报信，企图抢先发动政变。", next:"ec0"}] : [])
+    ];
+  }; }
+SC.e5w = {
+  act:5, tl:5, tone:"0",
+  stamp:"1976年10月6日 · 晚7时55分", place:"北京 · 中南海怀仁堂 · 东休息室",
+  title:"东休息室",
+  text:()=>{ const o = oct6(); return `
+<p class="aside">这一段历史上没有发生。<span class="tag fict">梦</span></p>
+<p>东休息室里有一张长沙发，一个茶几，茶几上放着两杯水，一杯是给你的。门关着，隔着门能听见走廊里的脚步声。</p>
+${o.zhang ? `<p>七点五十五分，走廊里有人说话。是张春桥的声音，他问，人都到了吗。然后是一阵很乱的响动，有人喊了一声，你们要干什么。再后来就没有声音了。</p>
+<p>八点半，姚文元也来了，也是一阵响动。江青是在她住的地方被带走的，毛远新在他的住处。</p>` : `<p>七点五十五分，张春桥推门进来，在你对面坐下。他没有说话，把文件包放在膝盖上，两只手按着。</p>
+<p>八点半，走廊里有一阵响动，是姚文元。江青是在她住的地方被带走的，毛远新在他的住处。</p>
+<p>张春桥一直看着那两杯水。后来他说，十年了。</p>`}
+<p>九点多，华国锋推门进来，身后是叶剑英。华国锋说，${o.zhang?"王洪文同志，你没有跟他们走到一起，中央是清楚的。":"春桥同志，洪文同志，事情就是这样。下面的工作，还要靠大家。"}</p>
+<p>叶剑英没有说话，在门口站了一会儿，走了。</p>`; },
+  choices:[
+    {t:"十月七日早上，华国锋又找你谈话。他说，上海那边，你去一趟。", set:null, a66:"1976年10月　拥护党中央粉碎“四人帮”的英明决策。", a77:null, next:"e6"}
+  ],
+  src:`<p><span class="tag hist">史实</span> 10月6日晚，张春桥、王洪文、姚文元先后在怀仁堂被隔离审查，江青、毛远新在住处被带走。见维基〈粉碎四人帮〉。</p>
+<p><span class="tag fict">虚构</span> 这一局里，你不在名单上。1976年10月，政治局里几位工农出身的委员，倪志福、吴桂贤、陈永贵、李素文都没有被抓，后来在1977至1980年间陆续退下。这一场按这个先例设计。</p>`
+};
+SC.e6 = {
+  act:5, tl:5, tone:"0",
+  stamp:"1976年10月8日至13日", place:"上海 · 康平路",
+  title:"锦江小礼堂",
+  text:()=>{ const o = oct6(); return `
+<p class="aside">这一段历史上没有发生。<span class="tag fict">梦</span></p>
+<p>${o.zhang?"跟你一起去上海的，是苏振华和倪志福。倪志福是北京的工人，跟你一样，当过劳模，十大以后进的政治局。飞机上他跟你说，你去说话，上海的人听得进。":"跟你一起去上海的，是张春桥。北京要他回上海，叫上海的人不要动。飞机上他一句话也没有说。"}</p>
+<p>上海已经知道了。康平路的会开了几个晚上，有人说要发告全国人民书，有人说要派民兵守住电台报社，朱永嘉说，打三天也好。民兵指挥部的人说，拉出来要一天。</p>
+<p>${rel("base")>=6?"你走进会议室的时候，屋里的人都站了起来。陈阿大坐在门口的地上，看见你，站起来，拍了拍裤子上的土。":"你走进会议室的时候，有几个人站了起来，有几个没有。陈阿大坐在门口的地上，看了你一眼，没有起来。"}</p>
+<p>${o.zhang?"北京给了你一句话，参加过这几天会的人，名单都要报上去。":"北京给了张春桥一句话，上海要稳住，名单以后再说。张春桥把这句话转给了你，说，你来讲。"}</p>`; },
+  choices:()=>[
+    {t:"你说北京的决定是对的，叫大家撤。散会以后，你把这几天参加会议的人的名单报了上去。", set:"e6_list",
+     a66:"1976年10月　在上海传达中央决定，揭发余党。", a77:null, next: oct6().zhang ? "z_hua" : "z_co"},
+    {t:"你说，枪锁起来，谁都别上街。北京那边，我去说，上海的人只要不动，就不追究。", set:"e6_cover",
+     a66:"1976年10月　在上海稳定局势。", a77:null, next: oct6().zhang ? "z_hua" : "z_co"},
+    {t:"你没有进会议室。你在锦江饭店住了一夜，叫马天水去传达，第二天回了北京。", set:"e6_stay",
+     a66:"1976年10月　赴上海了解情况。", a77:null, next: oct6().zhang ? "z_hua" : "z_co"}
+  ],
+  src:`<p><span class="tag hist">史实</span> 1976年10月8日至13日上海方面有过对抗的准备，13日马天水等从北京回沪传达后撤销。此后中央派苏振华、倪志福、彭冲到上海主持工作。见黄金海《十年非梦》第十一章、维基〈倪志福〉（搜索摘要）。</p>
+<p><span class="tag fict">虚构</span> 你去上海传达为游戏设定。三个选项都有代价，交名单的人保住了北京的信任，不交的人保住了上海的人。</p>`
+};
+SC.z_hua = Object.assign({}, Z, {
+  stamp:"1978年12月", place:"北京 · 京西宾馆",
+  title:"工作会议",
+  text:()=>`
+<p class="aside">这一段历史上没有发生。<span class="tag fict">梦</span></p>
+<p>中央工作会议开了一个多月。你还在政治局里，十一大以后不再是副主席，分管工会和劳动工资。</p>
+<p>会上陈云发了言，讲六十一人案，讲彭德怀，讲天安门。会场里有人鼓掌。也有人在小组会上说，“两个凡是”是谁提出来的，要说清楚。汪东兴的脸色很难看。华国锋坐在主席台中间，记笔记。</p>
+<p>你的小组里有人问你，一九六七年上海的事，你怎么看。你说，我是那时候过来的人。那人在本子上记了一笔。</p>
+<p>${has("e6_list")?"上海判了一批人，名单是你报上去的。黄金海托人带出来一句话，说他不怪你，换了他也一样。":has("e6_cover")?"上海那一周的人，北京答应你不追究，后来还是抓了几十个。你去找过华国锋两次，第二次他没有见你。":"上海那一周，你没有进会议室。后来上海判的人里，有人说，那天他们等过你。"}</p>
+<p>散会的时候，邓小平从你身边走过，看了你一眼。会议桌上放着两份东西，一份是公报的草稿，一份是你的工会报告，题目叫《关于恢复职工代表大会的意见》。</p>`,
+  src:`<p><span class="tag hist">史实</span> 1978年11月10日至12月15日中央工作会议，陈云发言提出薄一波等六十一人案、彭德怀、天安门事件等问题。1980年2月十一届五中全会，汪东兴、纪登奎、吴德、陈锡联辞去职务。</p><p><span class="tag fict">虚构</span> 王洪文留在华国锋格局里的世界线。</p>`
+});
+SC.z_co = Object.assign({}, Z, {
+  stamp:"1978年12月", place:"北京 · 中南海",
+  title:"两个人的公报",
+  text:()=>`
+<p class="aside">这一段历史上没有发生。<span class="tag fict">梦</span></p>
+<p>江青关在秦城，姚文元也是。张春桥还是政治局常委，坐在华国锋左边。邓小平一九七七年没有出来，还在批。叶剑英一年里病了两次，开会的时候常常不来。</p>
+<p>明天要开工作会议。公报的草稿是张春桥的人写的，有一段讲继续革命；华国锋的人又加了一段，讲四个现代化。两段放在一起，读起来像两个人在说话。</p>
+<p>你是副主席。${has("e6_list")?"上海那一周的名单是你报上去的，张春桥从此不跟你单独说话。":has("e6_cover")?"上海那一周，你答应过上海的人不追究，张春桥也点了头。北京有人说，你们两个是一伙的。":"上海那一周，你没有进会议室。张春桥后来跟你说，那天你要是进去了，就好了。"}</p>
+<p>内参上说，全国一千多万下乡知青，有几个省的知青在请愿；职工的工资十几年没有动。张春桥说，先讲知青。华国锋说，先讲生产。两个人都看着你。</p>`,
+  src:`<p><span class="tag fict">虚构</span> 张春桥、华国锋共治、王洪文在台上的世界线。历史上张春桥1976年10月6日被捕，1981年判死缓。</p>`
+});
+{ const t = SC.ec0.text; SC.ec0.text = () => has("warn_zcq") && !has("duty_room") ? `
+<p class="aside">这是一条梦里多出来的路。<span class="tag fict">梦</span></p>
+<p>张春桥没有去怀仁堂。他给姚文元、江青都打了电话。八点过了，怀仁堂那边等到的只有你。你在东休息室坐了一会儿，站起来，从东门出去，上了车。没有人拦你。</p>
+<p>那天夜里没有人睡。叶剑英离开中南海回了西山。汪东兴的警卫部队守着中南海的门。华国锋给你打了三次电话，你没有接。</p>
+<p>天快亮的时候，张春桥来找你。他说，现在只有一个办法，开中央全会，让二百多个中央委员来表决。他又说，你今天晚上做的事，我记着。</p>` : t(); }
+
+/* ---------- 工会那条路：不在名单上的 ---------- */
+const k7Free = () => !oct6().wang;
+{ const t = SC.k7b.text; SC.k7b.text = () => k7Free() ? t().replace(/<p>十月七日早上，来了两辆车。[\s\S]*?<\/p>/, `<p>十月七日早上，华国锋的秘书来了电话，请你去一趟。华国锋跟你谈了一个钟头，说工会的恢复工作要抓紧，全总明年要开代表大会。他说，你是工人出身，又是这两年管工会的人。</p>`) : t(); }
+{ const cs = SC.k7b.choices; SC.k7b.choices = () => k7Free() ? [
+    {t:"你回到工会大楼，把会议接着开完。", set:"k7_on", a66:"1976年10月　拥护党中央的决策，继续主持工会恢复工作。", a77:null, next:"z_k7"},
+    {t:"你在会议记录的最后一页写了一行字，工会干部由会员选。然后回去把会开完。", set:"k7_note", a66:null, a77:null, next:"z_k7"}
+  ] : cs; }
+ECHO.k7_on = {fx:"会开到了半夜。散会的时候，湖南来的人跟你握手，握得很紧。"};
+{ const t = SC.z_k7.text; SC.z_k7.text = () => k7Free() ? `
+<p class="aside">这一段历史上没有发生。<span class="tag fict">梦</span></p>
+<p>十月，全国总工会开了第九次代表大会。你是副主席，坐在主席台第二排，主席是倪志福。</p>
+<p>大会通过的章程里有一条，基层工会的干部由会员选举。这一条是你在筹备组吵了两年吵下来的，最后写进去的时候，前面多了几个字，在党的领导下。</p>
+<p>十二月，三中全会开过了。你去十七厂开座谈会，细纱车间的人问你，工会能不能管住房，能不能管调资，能不能管厂长。你说，能管的，我们一样一样去争。${has("tw_keep")?"范福林坐在后排，没有举手发言，散会以后在门口等你。":""}${has("gx_hide")?"仓库里那个广西姑娘也来了，坐在最后。":""}</p>
+<p>车间外面的墙上，新贴了一张大字报，署名是几个青工，题目叫《工会是谁的》。</p>` : t(); }
+
+/* ---------- 世界线：台上的人 ---------- */
+Object.assign(WTYPES, {R:"华国锋的格局", C:"共治"});
+const ONSTAGE_N = ["华国锋","邓小平","叶剑英","张春桥","江青","姚文元","王洪文"];
+const onStageWorld = w => ["W","R","C"].includes(w.t) || (w.t==="G" && w.s==="2");
+function onStageNow(w){
+  const t = w.t;
+  if(t==="W") return [has("ec_purge")?2:1, 2, has("ec_purge")?3:1, 1, 1, 1, 1];
+  if(t==="C") return [1, 2, 1, 1, 3, 3, 1];
+  if(t==="R") return [1, 1, 1, 3, 3, 3, 1];
+  const wang = t==="X" ? 0 : t==="F" ? 2 : t==="D" ? 2 : t==="G" ? (w.s==="2" ? 1 : 2) : 3;
+  return [1, 1, 1, 3, 3, 3, wang];
+}
+{ const old = worldNow; worldNow = function(){
+    const path = st.path||[];
+    for(let i=path.length-1;i>=0;i--){
+      const k = path[i];
+      if(k==="z_hua") return {t:"R", s:has("e6_list")?"0":has("e6_cover")?"1":"2", at:k};
+      if(k==="z_co") return {t:"C", s:has("e6_list")?"0":has("e6_cover")?"1":"2", at:k};
+      if(k==="z_k7" && k7Free()) return {t:"G", s:"2", at:k};
+      if(k.startsWith("z_") || (SC[k] && SC[k].death)) break;
+    }
+    return old();
+  }; }
+{ const old = worldStart; worldStart = function(type, facts){
+    if(type==="W") return old("W", facts);
+    if(type==="R" || type==="C"){
+      const base = old("W", facts), hist = old("H", facts);
+      /* 台上的世界线：在历史大势的基础上，王洪文自己种下的东西留下一半。 */
+      return hist.map((v,i)=> type==="C" ? Math.round((v+base[i])/2) : Math.max(v, Math.min(base[i], v+1)));
+    }
+    return old(type, facts);
+  }; }
+const RELK = ["jq","zcq","hua","lao","mao","base"];
+encodeWorld = function(){
+  const w = worldNow(); if(!w) return null;
+  const axv = ["voice","hand","clean","ladder"].map(k=>Math.max(0, Math.min(31, ax(k))));
+  const rv = RELK.map(k=>Math.max(0, Math.min(31, rel(k)+15)));
+  const dims = worldStart(w.t, st.facts.slice());
+  const bits = WFACTS.map(([ks])=>ks.some(has)?1:0);
+  const people = worldPeopleNow(w.t);
+  const stage = onStageNow(w);
+  const dn = dims.reduce((n,v)=>n*4+v,0), fn = bits.reduce((n,v)=>n*2+v,0), pn = people.reduce((n,v)=>n*4+v,0), sn = stage.reduce((n,v)=>n*4+v,0);
+  const parts = [w.t+w.s, axv.map(v=>B32[v]).join(""), rv.map(v=>B32[v]).join(""), b32(dn,7), b32(fn,8), b32(pn,5), b32(sn,3)];
+  const body = parts.join("");
+  const ck = B32[[...body].reduce((s,c)=>s+B32.indexOf(c),0)%32];
+  return {code:`MFM2-${parts.join("-")}-${ck}`, t:w.t, s:w.s, at:w.at, ax:axv, rel:rv.map(v=>v-15), dims, bits, people, stage};
+};
+{ const v1 = decodeWorld; decodeWorld = function(code){
+    let s = String(code||"").toUpperCase().replace(/[\s-]/g,"").replace(/[IL]/g,"1").replace(/O/g,"0");
+    if(s.startsWith("MFM1")) return v1(code);
+    if(!s.startsWith("MFM2")) return {ok:false, err:"不是 MFM1 或 MFM2 格式的代码。"};
+    s = s.slice(4);
+    if(s.length!==36 || [...s].some(c=>B32.indexOf(c)<0)) return {ok:false, err:"长度或字符不对。"};
+    const body = s.slice(0,35), ck = s[35];
+    if(B32[[...body].reduce((n,c)=>n+B32.indexOf(c),0)%32]!==ck) return {ok:false, err:"校验位不对，可能抄错了一个字。"};
+    const t = body[0], sub = body[1];
+    if(!WTYPES[t]) return {ok:false, err:"不认识的世界线主型。"};
+    const ax4 = [...body.slice(2,6)].map(c=>B32.indexOf(c));
+    const r6 = [...body.slice(6,12)].map(c=>B32.indexOf(c)-15);
+    let dn = unb32(body.slice(12,19)), fn = unb32(body.slice(19,27)), pn = unb32(body.slice(27,32)), sn = unb32(body.slice(32,35));
+    const dims = []; for(let i=0;i<16;i++){ dims.unshift(dn%4); dn = Math.floor(dn/4); }
+    const bits = []; for(let i=0;i<40;i++){ bits.unshift(fn%2); fn = Math.floor(fn/2); }
+    const people = []; for(let i=0;i<12;i++){ people.unshift(pn%4); pn = Math.floor(pn/4); }
+    const stage = []; for(let i=0;i<7;i++){ stage.unshift(sn%4); sn = Math.floor(sn/4); }
+    return {ok:true, version:2, type:t, typeName:WTYPES[t], sub, onStage: stage[6]===1,
+      ax:{voice:ax4[0], hand:ax4[1], clean:ax4[2], ladder:ax4[3]},
+      rel:Object.fromEntries(RELK.map((k,i)=>[REL[k].n, r6[i]])), relRaw:r6,
+      dims:Object.fromEntries(WDIMS.map((n,i)=>[n,dims[i]])), dimsRaw:dims,
+      facts:WFACTS.filter((_,i)=>bits[i]).map(([ks,label])=>({keys:ks, label})), bits,
+      people:Object.fromEntries(WPEOPLE.map((n,i)=>[n,people[i]])), peopleRaw:people,
+      stage:Object.fromEntries(ONSTAGE_N.map((n,i)=>[n,stage[i]])), stageRaw:stage};
+  }; }
+{ const old = worldOneLine; worldOneLine = w => w.t==="R" ? "一九七八年十二月，北京在开中央工作会议。四人帮里抓了三个，你不在里面。你还在政治局，坐在华国锋这一边，邓小平已经出来了。"
+  : w.t==="C" ? "一九七八年十二月，抓了江青和姚文元，张春桥和华国锋一起主持中央。你是副主席，坐在两个人中间。邓小平没有出来。"
+  : (w.t==="G" && w.s==="2") ? "一九七八年十二月，北京开了三中全会。你没有被抓，十月当了全国总工会的副主席。"
+  : old(w); }
+{ const old = worldPart2; worldPart2 = w => !onStageWorld(w) ? old(w)
+  : w.t==="W" ? old(w)
+  : w.t==="R" ? "第二部从这里开始。你在台上，可台上的风向在变。工作会议以后，邓小平和陈云的人越来越多，“两个凡是”的人会一个一个退下去。你要决定，跟着华国锋，还是去找邓小平，或者守着工会。"
+  : w.t==="C" ? "第二部从这里开始。张春桥要继续革命，华国锋要四个现代化，老干部等着邓小平。你坐在中间，每一次表决都可能是最后一次。"
+  : "第二部从这里开始。你不在政治局，可你在全总。十七厂的人会来问你，工会能不能管住房、管调资、管厂长。"; }
+{ const old = worldPanel; worldPanel = function(){
+    const h = old(); const w = st.world; if(!w || !w.stage) return h;
+    const lab = ["","在台上","靠边","被抓"];
+    const row = ONSTAGE_N.map((n,i)=>w.stage[i] ? `${n} ${lab[w.stage[i]]}` : "").filter(Boolean).join("　");
+    const rr = (w.rel||[]).map((v,i)=>`${REL[RELK[i]].n} ${v}`).join("　");
+    return h.replace(`<p class="w2">`, `<h4>一九七八年十二月，台上的人</h4><p class="note-start">${row}</p><h4>跟谁走得近</h4><p class="note-start">${rr}</p><p class="w2">`);
+  }; }
+Object.assign(WLENS, {
+  R:{huang:`他没有跟他们一起进去，这一点我在里面听说了。上海判我们的时候，有人说名单上的字是他的笔迹。`,
+     xu:`他在华国锋那边坐了两年。那两年他做的事，比他在我们这边十年做的都多，也都少。`,
+     li:`一个造反派出身的工人副主席留在了1976年以后的中央，在历史上没有先例。他的处境跟倪志福、吴桂贤这些人相近，靠的是没有跟江青走到一起，丢的是上海造反派对他的信任。`},
+  C:{huang:`江青被抓了，春桥和老王还在。那一年上海的人不知道该高兴还是该害怕。`,
+     xu:`共治这种事，在中国很少长久。两个人都等着对方先犯错。`,
+     li:`如果张春桥没有被捕，“四人帮”这个说法本身就不会成立。1976年10月的名单，在历史上是几个人在二十七天里商定的；在这条梦里，名单短了两个人，后来十年的走向就要重新推演。`}
+});
+{ const old = ENDW.title; ENDW.title = o => ({R:"工作会议", C:"两个人的公报"})[o] || old(o); }
+{ const old = ENDW.place; ENDW.place = () => { const t = (worldNow()||{}).t; return t==="R" ? "北京 · 京西宾馆" : t==="C" ? "北京 · 中南海" : old(); }; }
+{ const old = ENDW.open; ENDW.open = o => (o==="R"||o==="C") ? `<p>你醒过来。这一局停在一九七八年十二月，你还在台上。</p>` : old(o); }
+ENDINGS.push({k:"fin_hua", n:"工作会议", hint:"1976年9月站到华国锋一边，名单上就没有你。"}, {k:"fin_co", n:"两个人的公报", hint:"1976年9月劝张春桥跟江青分开，自己也不在名单上。"});
+DOOR_REQ.push(["1976年10月的名单", "主席当面点过你（去江青那里、去长沙），起点就高；设值班室、九月里站在江青一边会让你上名单；跟华国锋、老干部近会让你下名单。劝张春桥跟江青分开，要你跟张春桥很近，也跟华国锋处得来。"]);
+
+/* ---------- 台上的人：1977年到1978年，大局抵定 ----------
+   留在台上的几条线不在1976年10月结束，接着走到1978年，看最后坐在哪里。 */
+ACTS[6] = "第六幕 · 一九七八";
+const nextAfterE6 = () => oct6().zhang ? "r1" : "co1";
+{ const cf = SC.e6.choices; SC.e6.choices = () => cf().map(c => Object.assign({}, c, {next: nextAfterE6()})); }
+reroute("ec1","z_k6","w1");
+
+/* 华国锋的格局 */
+SC.r1 = {
+  act:6, tl:1, tone:"0",
+  stamp:"1977年2月至8月", place:"北京",
+  title:"两个凡是",
+  ctx:()=>`<h4>一九七七年</h4>
+<p>1977年2月7日，两报一刊社论《学好文件抓好纲》提出，凡是毛主席作出的决策，都坚决维护；凡是毛主席的指示，都始终不渝地遵循。7月十届三中全会恢复邓小平的职务。8月十一大，华国锋任主席，叶剑英、邓小平、李先念、汪东兴任副主席。<span class="tag hist">史实</span></p>`,
+  text:()=>`
+<p class="aside">这一段历史上没有发生。<span class="tag fict">梦</span></p>
+<p>二月，报上登了一篇社论，凡是主席作出的决策，都要坚决维护，凡是主席的指示，都要始终不渝地遵循。汪东兴在会上说，这两句话是华主席的意思。</p>
+<p>七月要开全会，议程里有一条，恢复邓小平同志的职务。会前，叶剑英请你去西山吃饭，桌上只有你们两个。他说，小平同志出来，是大势所趋，你是工人出身，你说一句话，下面的造反派会安心一些。</p>
+<p>第二天，汪东兴也找了你。他说，华主席待你不薄，十月那天晚上，是华主席保的你。</p>
+<p>${has("e6_list")?"上海那批人已经判了，名单上的字是你的笔迹。":"上海那批人还关着，等着判。"}全会上要举手。</p>`,
+  choices:[
+    {t:"全会上你第一个发言，说拥护小平同志出来工作。", set:"r1_deng",
+     a66:"1977年7月　拥护恢复邓小平同志职务。", a77:null, next:"r2"},
+    {t:"你说，凡是主席定的，我们照着办。小平同志的事，听华主席的。", set:"r1_hua",
+     a66:"1977年7月　拥护华主席。", a77:null, next:"r2"},
+    {t:"你举了手，没有发言。会后你交上去一份报告，说工会和职工代表大会要先恢复起来。", set:"r1_mid",
+     a66:"1977年　提出恢复工会和职工代表大会。", a77:null, next:"r2"}
+  ],
+  src:`<p><span class="tag hist">史实</span> “两个凡是”见1977年2月7日两报一刊社论。十届三中全会1977年7月恢复邓小平职务，十一大8月召开。</p><p><span class="tag fict">虚构</span> 王洪文在华国锋格局里的位置为游戏设定。</p>`
+};
+SC.r2 = {
+  act:6, tl:1, tone:"0",
+  stamp:"1978年5月至6月", place:"北京",
+  title:"检验真理的标准",
+  text:()=>`
+<p class="aside">这一段历史上没有发生。<span class="tag fict">梦</span></p>
+<p>五月十一日，《光明日报》登了一篇特约评论员文章，《实践是检验真理的唯一标准》。第二天，《人民日报》《解放军报》转载了。</p>
+<p>汪东兴在会上说，这篇文章是砍旗子的，矛头对着主席。邓小平在军队的会上说，实事求是是主席思想的出发点。华国锋没有表态。</p>
+<p>${has("r1_deng")?"去年全会上你第一个发言，邓小平记得。这次他的秘书打来电话，问你能不能在工会系统组织讨论。":has("r1_hua")?"去年全会上你说了凡是，汪东兴记得。这次他叫人送来一份材料，要你在工会系统批这篇文章。":"去年你交的那份报告，批了一半，职代会在几个厂试点，另一半压着。"}</p>
+<p>十七厂的工人来信说，厂里的规章还是一九七七年贴回去的那一套，第十四条也在。</p>`,
+  choices:[
+    {t:"在全总的会上组织讨论，说实践是检验真理的唯一标准，工厂里的事也一样。", set:"r2_deng",
+     a66:"1978年　组织工会系统学习讨论真理标准问题。", a77:null, next:"z_hua"},
+    {t:"照汪东兴的意思，在工会系统批这篇文章。", set:"r2_hua",
+     a66:"1978年　组织批判。", a77:null, next:"z_hua"},
+    {t:"不表态。你去了一趟十七厂，跟细纱车间的人开了一个下午的会，讨论第十四条。", set:"r2_mid",
+     a66:"1978年　深入基层调查研究。", a77:null, next:"z_hua"}
+  ],
+  src:`<p><span class="tag hist">史实</span> 1978年5月11日《光明日报》特约评论员文章，次日两报转载；汪东兴等人批评文章，邓小平6月2日在全军政治工作会议上讲实事求是。</p><p><span class="tag fict">虚构</span> 王洪文的选择为游戏设定。</p>`
+};
+Object.assign(RELW, {r1_deng:{lao:3,hua:-2,base:-1}, r1_hua:{hua:2,lao:-2}, r1_mid:{base:1}, r2_deng:{lao:2,hua:-2}, r2_hua:{hua:2,lao:-3}, r2_mid:{base:1}});
+Object.assign(ECHO, {
+  r1_deng:{fx:"全会通过了。散会的时候，邓小平跟你握了一下手。汪东兴从此不跟你说话。上海有人骂你是投降派。"},
+  r1_hua:{fx:"全会通过了，你也举了手。邓小平看了你一眼。华国锋在十一大上把你留在了政治局。"},
+  r1_mid:{fx:"报告批下来一半。职代会在几个厂试点，选厂长那一条划掉了。"},
+  r2_deng:{fx:"工会系统的讨论会开了几百场。有个车间的工人说，那我们厂的规章，也拿实践检验检验。"},
+  r2_hua:{fx:"批判会开了，没有人发言。会后有人在走廊里小声说，王洪文又跟错了一回。"},
+  r2_mid:{fx:"十七厂的会开到了天黑。第十四条，车间里的人投票，三百多票对二十几票，撕了。"}
+});
+
+/* 共治 */
+SC.co1 = {
+  act:6, tl:1, tone:"0",
+  stamp:"1977年7月", place:"北京 · 中南海",
+  title:"一票",
+  text:()=>`
+<p class="aside">这一段历史上没有发生。<span class="tag fict">梦</span></p>
+<p>一九七七年，张春桥和华国锋一起主持中央。报上一天讲继续革命，一天讲四个现代化。</p>
+<p>七月，叶剑英在政治局提出，恢复邓小平同志的工作。张春桥说不行，一九七六年的决议是主席定的，翻不得。华国锋说，可以研究。李先念说，经济上的事太多，需要人。</p>
+<p>算下来，举手的和不举手的差一票。所有人都看着你。</p>
+<p>${has("e6_cover")?"去年十月，上海那一周，你答应过不追究的人，张春桥替你保了下来。":"去年十月，上海那一周的名单，张春桥知道是你报的。"}</p>`,
+  choices:[
+    {t:"你举了手。邓小平出来。", set:"c1_deng",
+     a66:"1977年7月　同意恢复邓小平同志工作。", a77:null, next:"co2"},
+    {t:"你没有举手。", set:"c1_no",
+     a66:"1977年7月　坚持主席生前的决定。", a77:null, next:"co2"},
+    {t:"你说，小平同志可以出来，管科学和教育，不进常委。", set:"c1_half",
+     a66:"1977年7月　提出邓小平同志分管科教。", a77:null, next:"co2"}
+  ],
+  src:`<p><span class="tag fict">虚构</span> 张春桥、华国锋共治的世界线里，邓小平能不能复出是一票之差。历史上1977年7月十届三中全会恢复邓小平职务，邓小平随后自告奋勇分管科学和教育。</p>`
+};
+SC.co2 = {
+  act:6, tl:1, tone:"0",
+  stamp:"1978年春", place:"北京 · 人民大会堂",
+  title:"十年规划",
+  text:()=>`
+<p class="aside">这一段历史上没有发生。<span class="tag fict">梦</span></p>
+<p>${has("c1_deng")?"邓小平出来以后，张春桥在常委会上说话越来越少。":has("c1_half")?"邓小平管着科学和教育，恢复了高考。张春桥说这是复辟，没有拦住。":"邓小平还在批。叶剑英病了一场，开会的时候常常不来。"}</p>
+<p>三月，华国锋拿出一个十年规划，要建一百二十个大项目，钢产量到一九八五年要到六千万吨，要从国外买成套设备，钱从石油出口里来。张春桥说，这是洋跃进，是爬行主义。</p>
+<p>两个人都等着你开口。工会的人也在等，十几年没调过的工资，规划里一个字也没提。</p>`,
+  choices:[
+    {t:"你支持十年规划。设备要买，人也要派出去学。", set:"c2_hua",
+     a66:"1978年　支持十年规划。", a77:null, next:"z_co"},
+    {t:"你支持张春桥。大项目缓一缓，先搞继续革命。", set:"c2_zcq",
+     a66:"1978年　坚持继续革命。", a77:null, next:"z_co"},
+    {t:"你说，大项目砍一半，省下来的钱给二级工调工资。", set:"c2_wage",
+     a66:"1978年　提出调整职工工资。", a77:null, next:"z_co"}
+  ],
+  src:`<p><span class="tag hist">史实</span> 1978年华国锋提出的十年规划，计划新建一百二十个大项目，大量引进成套设备，后来被称为“洋跃进”。1977年恢复高考。</p><p><span class="tag fict">虚构</span> 张春桥在台上的世界线为游戏设定。</p>`
+};
+Object.assign(RELW, {c1_deng:{lao:3,zcq:-3}, c1_no:{zcq:2,lao:-3}, c1_half:{lao:1,zcq:-1,hua:1}, c2_hua:{hua:2,zcq:-2}, c2_zcq:{zcq:2,hua:-2}, c2_wage:{base:2,hua:-1,zcq:-1}});
+Object.assign(ECHO, {
+  c1_deng:{fx:"决议通过了。张春桥收起文件包，第一个走出了会议室。"},
+  c1_no:{fx:"决议没有通过。叶剑英那天晚上回了西山，第二天没有来开会。"},
+  c1_half:{fx:"两边都没有反对。邓小平说，好，我管科教。张春桥说，教育是重灾区。"},
+  c2_hua:{fx:"规划通过了。第一批合同签了七十多亿美元。张春桥在常委会上说，小王变了。"},
+  c2_zcq:{fx:"规划压了下来，改成三年再议。华国锋没有说话，李先念摔了一下笔。"},
+  c2_wage:{fx:"两边都骂你。最后的规划里加了一句，适当调整职工工资，四十多块的二级工涨了五块。"}
+});
+
+/* 继续革命 */
+SC.w1 = {
+  act:6, tl:1, tone:"0",
+  stamp:"1977年", place:"北京",
+  title:"枪",
+  text:()=>`
+<p class="aside">这一段历史上没有发生。<span class="tag fict">梦</span></p>
+<p>${has("ec_purge")?"叶剑英和汪东兴关在西山，北京军区的司令员每个礼拜来汇报一次，每次都说服从中央。":"叶剑英还在政治局，每次开会都坐在门边，几位老帅的电话都打到他那里。"}</p>
+<p>一九七七年夏天，几个大军区的报告送到你桌上。部队要经费，要装备，要撤回地方的支左人员，还占着的房子不想退。南京军区的报告最后一句是，部队的同志有思想问题。</p>
+<p>${has("mil_unit")?"上海的民兵还是按厂组织的，枪库两把锁。":"上海的民兵有二十多万件枪械。"}张春桥说，民兵是第二武装，要靠它。江青说，部队里有右倾翻案的人，要查。</p>`,
+  choices:[
+    {t:"扩大民兵，各省都建民兵指挥部，跟军区分开。", set:"w1_mil",
+     a66:"1977年　加强民兵建设。", a77:null, next:"w2"},
+    {t:"给部队让步。经费加一成，支左的人撤回，占的房子慢慢退，不查。", set:"w1_army",
+     a66:"1977年　安定军队。", a77:null, next:"w2"},
+    {t:"支左的人撤回，房子限期退，民兵也收回去归武装部。两边都不靠。", set:"w1_both",
+     a66:"1977年　整顿军队和民兵。", a77:null, next:"w2"}
+  ],
+  src:`<p><span class="tag hist">史实</span> 三支两军先后派出两百多万人，1972年起陆续撤出；部队占用民房的问题，中央1972年发文要求退房。1976年上海民兵号称三百万人，有各种枪械二十多万件。见杨继绳《天地翻覆》第十、十三章、李逊《革命造反年代》第三十九章（转述）。</p><p><span class="tag fict">虚构</span> 四人帮胜出以后的军队问题。</p>`
+};
+SC.w2 = {
+  act:6, tl:1, tone:"0",
+  stamp:"1978年4月", place:"北京 · 天安门广场",
+  title:"又一个清明",
+  text:()=>`
+<p class="aside">这一段历史上没有发生。<span class="tag fict">梦</span></p>
+<p>一九七八年清明，纪念碑前又有了花圈，比两年前少，可是每天都有。有人贴出一张大字报，要求给一九七六年四月五日平反，署名是几个工人。</p>
+<p>公安部的报告送到政治局。江青说，跟两年前一样办。张春桥说，花圈可以送，大字报要撕。</p>
+<p>${has("sw_go")?"你想起两年前四月四日下午，你在纪念碑的台阶上看人抄诗。":has("sw_soft")?"你想起两年前，你叫上海不要拦悼念的人。":"你想起两年前，你给上海打电话，叫他们订方案。"}${has("w1_mil")?"现在各省都有了民兵指挥部，广场上的人也知道。":""}</p>`,
+  choices:[
+    {t:"“平反。四五那天被抓的人，都放出来。”", set:"w2_redress",
+     a66:"1978年　为天安门事件平反。", a77:null, next:"z_k6"},
+    {t:"“人放出来，不平反。广场上的事，以后再说。”", set:"w2_half",
+     a66:"1978年　释放天安门事件中被拘留人员。", a77:null, next:"z_k6"},
+    {t:"“跟两年前一样办。”", set:"w2_hard",
+     a66:"1978年　处理天安门广场事件。", a77:null, next:"z_k6"}
+  ],
+  src:`<p><span class="tag hist">史实</span> 1978年11月北京市委宣布天安门事件“完全是革命行动”。</p><p><span class="tag fict">虚构</span> 四人帮胜出的世界里，四五平不平反，是继续革命的政权面对的第一道题。</p>`
+};
+Object.assign(RELW, {w1_mil:{base:2,zcq:1}, w1_army:{lao:2,base:-1}, w1_both:{lao:1,base:-1,mao:-1}, w2_redress:{lao:2,jq:-3,zcq:-1,base:1}, w2_half:{jq:-1,lao:1}, w2_hard:{jq:2,zcq:1,base:-1}});
+Object.assign(ECHO, {
+  w1_mil:{fx:"各省的民兵指挥部建起来了。几个军区的司令员不再来北京开会，说身体不好。"},
+  w1_army:{fx:"部队安静了。江青说你投降了军阀。上海的民兵指挥部改归警备区，有人在指挥部门口贴了一张大字报。"},
+  w1_both:{fx:"军队和民兵都不满意。张春桥说你两头不讨好，叶剑英说你懂事了。"},
+  w2_redress:{fx:"放出来的人里，有一个叫韩小平的车工。江青在政治局会上摔了茶杯。"},
+  w2_half:{fx:"人放出来了，大字报撕了。第二天又贴了出来，换了一个署名。"},
+  w2_hard:{fx:"那天夜里，民兵又进了广场。这一次带头的，是你签过字的方案。"}
+});
+Object.assign(HX, {r1:{h:[], say:"没有这一段。"}, r2:{h:[], say:"没有这一段。"}, co1:{h:[], say:"没有这一段。"}, co2:{h:[], say:"没有这一段。"}, w1:{h:[], say:"没有这一段。"}, w2:{h:[], say:"没有这一段。"}});
+
+/* 收束场景按大局写最后一段 */
+{ const t = SC.z_hua.text; SC.z_hua.text = () => t() + `<p>${(has("r1_deng")||has("r2_deng")) && !has("r1_hua") && !has("r2_hua") ? "大局已经定了。你坐在邓小平这一边的那几排，下面的造反派不再叫你老王了。" : (has("r1_hua")||has("r2_hua")) ? "大局已经定了。你坐在华国锋这一边，汪东兴旁边的位置空着，听说他明年也要退。" : "大局已经定了。你坐在两边中间，手里只有工会。"}</p>`; }
+{ const t = SC.z_co.text; SC.z_co.text = () => t() + `<p>${has("c1_deng") ? "大局已经定了。邓小平出来以后，张春桥一年里在常委会上说的话越来越少，人还坐在那里。" : has("c1_no") ? "大局已经定了。邓小平没有出来，叶剑英病着，张春桥和华国锋各管一半。" : "大局还悬着。邓小平管着科学和教育，张春桥管着宣传，你管着工会，三个人中间隔着华国锋。"}</p>`; }
+{ const t = SC.z_k6.text; SC.z_k6.text = () => t() + `<p>${has("w2_redress") ? "四五平反的文件你签了字。江青三个月没有跟你说话。" : has("w2_hard") ? "清明那天的事，内参上写了两页。你看完，把它压在了最底下。" : "四五那天被抓的人放了出来，事情没有定性。"}</p>`; }
+{ const old = worldNow; worldNow = function(){
+    const w = old();
+    if(w && w.t==="R") w.s = (has("r1_hua")||has("r2_hua")) ? "0" : (has("r1_deng")||has("r2_deng")) ? "1" : "2";
+    if(w && w.t==="C") w.s = has("c1_deng") ? "1" : has("c1_no") ? "0" : "2";
+    if(w && w.t==="W") w.s = B32[(has("ec_purge")?1:0) + (has("w1_mil")?2:has("w1_army")?4:0) + (has("w2_redress")?8:has("w2_hard")?16:0)];
+    return w;
+  }; }
+{ const old = onStageNow; onStageNow = function(w){
+    const s = old(w);
+    if(w.t==="C" && w.s==="1"){ s[1] = 1; s[3] = 2; }
+    if(w.t==="C" && w.s==="2"){ s[1] = 1; }
+    return s;
+  }; }
+
+/* ---------- 被拿下以后，梦里知道的事 ----------
+   怀仁堂那一夜照历史写，来得突然，事先不给提示。被拿下一次以后，在这一场的末尾告诉玩家，下一次梦里要什么条件，会怎样。 */
+const ARREST_KEY = "mfm-arrested";
+function arrestHint(){
+  try{ localStorage.setItem(ARREST_KEY, "1"); }catch(e){}
+  const o = oct6(), named = any("go_jq","cs_lushan","cs_mild");
+  const v = k => `${REL[k].n} ${rel(k)}`;
+  return `<div class="panel hint"><h3>梦醒以前，你想明白了几件事</h3>
+<p>那天晚上的名单，是毛泽东去世以后二十七天里定下来的。名单上有没有你，看的是这几年你跟谁走得近。这一局里，${v("jq")}，${v("hua")}，${v("lao")}，${v("zcq")}。${named?"一九七四年你去过江青那里或者去了长沙，主席当面点过你，起点就高。":"主席没有当面点过你。"}${has("duty_room")?"九月里你设了值班室，这一条就够了。":""}${has("e3_jq")?"九月二十九日的会上，你站在了江青一边。":""}</p>
+<ul>
+<li>不上名单。跟江青远一点，一九七四年不去长沙，不去她那里；主席去世以后不设值班室；九月二十九日的会上站到华国锋一边。跟老干部近也有用。代价是上海的老兄弟说你变了。</li>
+<li>张春桥也不上名单。要你跟张春桥一直很近，又跟华国锋处得来；九月里劝他跟江青分开。那以后是两个人共治。</li>
+<li>继续革命。设了值班室，“向上靠”攒到十四，十月六日那天就可以不下楼。或者，你自己不在名单上而张春桥在，那天下午给他打一个电话。</li>
+<li>不在台上，也有别的路。一九七五年夏天去管工会，跟邓小平去整顿，清明那天去广场，都会让十月六日变成另一个晚上。</li>
+</ul>
+<p class="disclaim">这些是梦里的规则，历史上没有这样的计算。</p></div>`;
+}
+{ const t = SC.e5.text; SC.e5.text = () => t() + arrestHint(); }
 
 /* ---------- render ---------- */
 const app = document.getElementById("app");
@@ -5856,7 +6304,7 @@ if(window.claude && window.claude.hot && window.claude.hot.snapshot){
   try{ window.claude.hot.snapshot(()=>({st})) }catch(e){}
 }
 render();
-window.__mfm = {SC, ECHO, HX, ax, start:startDream, sim:simulate, encodeWorld, decodeWorld, worldStart, worldNow, WFACTS, WDIMS, WPEOPLE, get st(){ return st; }};
+window.__mfm = {SC, ECHO, HX, ax, rel, oct6, RELW, start:startDream, sim:simulate, encodeWorld, decodeWorld, worldStart, worldNow, WFACTS, WDIMS, WPEOPLE, get st(){ return st; }};
 })();
 </script>
 

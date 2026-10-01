@@ -11,6 +11,9 @@ const ROUTES = {
   square: {prefs:['dissent','go_back','visit_hosp','kp_talk','talk_cwd','add_temp','protect','a6_refuse','a6_propose','lyz_debate','sw_go','ea_speak','k4_write'], avoid:['no_rename','reconcile','register','k7_go','b2_coop','a4_clause','cs_skip']},
   commune:{prefs:['cite_const','lead_col','elect','no_rename','ca_rules','ca_vote','k1_qian','k1_wreath','mil_unit','k1_lock'], avoid:['k7_go']},
   reconcile:{prefs:['dissent','go_back','talk_cwd','kp_talk','visit_hosp','let_north','buffer','assoc_all','seat_cwd','reconcile','cr_both','k2_fq_free','k2_disarm'], avoid:['k7_go']},
+  stay:   {prefs:['go_zel','no_duty','e3_hua','wait_hrt','e6_cover','r1_deng','r2_mid'], hist:true, avoid:['k7_go','b2_coop','a4_clause','sw_go','duty_room','cs_skip','c1_move','warn_zcq','call_sh']},
+  cogov:  {prefs:['deal','block_hg','go_zcq','cs_mild','imp_learn','tj_exam','jd_files','hm_stop','sw_soft','mil_down','no_duty','e3_split','wait_hrt','e6_list','c1_half','c2_wage'], hist:true, avoid:['k7_go','b2_coop','a4_clause','sw_go','duty_room','go_jq','cs_lushan','c1_move','warn_zcq','call_sh']},
+  win2:   {prefs:['go_zel','no_duty','e3_hua','warn_zcq','ec_plenum','w1_both','w2_half'], hist:true, avoid:['k7_go','b2_coop','a4_clause','sw_go','duty_room','cs_skip','call_sh']},
   drift:  {prefs:['dissent','go_back','talk_cwd','kp_talk','visit_hosp','add_temp','tw_quota','tw_keep','qh_keep','geng_talk','fan_open','ls_talk','protect','mil_unit','nj_both','qd_rules','gx_hide','ags_mix','ll_quiet','nx_mill','k2_fq_free','k2_vote'], avoid:['no_rename','reconcile','register','seat_cwd','elect']}
 };
 (async()=>{
@@ -46,7 +49,7 @@ const ROUTES = {
       trail.push(scene);
       await p.click(`.choice[data-i="${pick}"]`);
     }
-    const res = await p.evaluate(()=>{ const M = window.__mfm, st = M.st; const w = st.world; return {scene:st.scene, branch:st.branch, code:w&&w.code, dec:w&&M.decodeWorld(w.code), ax:['voice','hand','clean','ladder'].map(k=>M.ax(k))}; });
+    const res = await p.evaluate(()=>{ const M = window.__mfm, st = M.st; const w = st.world; window.__o6 = M.oct6(); return {scene:st.scene, branch:st.branch, code:w&&w.code, dec:w&&M.decodeWorld(w.code), ax:['voice','hand','clean','ladder'].map(k=>M.ax(k))}; });
     const wp = await p.$eval('.world', x=>x.innerText).catch(()=>'(no world panel)');
     console.log('\n==', name, res.scene, res.branch, res.code, 'ax', res.ax.join(','));
     console.log('   ', trail.join(' > '));
