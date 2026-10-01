@@ -19,11 +19,11 @@ const routes = {
 };
 async function pick(page,key){
   if(key==='#next') return page.click('#next');
-  if(key==='@end'){ if(await page.$('#c-end')) return page.click('#c-end'); const h=await page.$eval('h2',h=>h.textContent); if(['吸收','两参一改三结合','公报','四十三亿美元'].includes(h)){ const bs=await page.$$('.choice[data-i]'); await bs[0].click(); await page.waitForTimeout(50); return pick(page,key);} throw new Error('no end at '+h); }
+  if(key==='@end'){ if(await page.$('#c-end')) return page.click('#c-end'); const h=await page.$eval('h2',h=>h.textContent); if(['吸收','两参一改三结合','公报','四十三亿美元','艺徒','临时工','青海','全红总','郑州的名单','一根棍子','南京','专案组','学习班','广西来的人','工艺规程','以工代干','白卷','头上长角','前门和后门','一屋子材料','杭州','规章','七三开','三分'].includes(h)){ const bs=await page.$$('.choice[data-i]'); await bs[0].click(); await page.waitForTimeout(50); return pick(page,key);} throw new Error('no end at '+h); }
   const bs = await page.$$('.choice[data-i]');
   for(const b of bs){ if((await b.textContent()).includes(key)) return b.click(); }
+  { const h=await page.$eval('h2',h=>h.textContent); if(['吸收','两参一改三结合','公报','四十三亿美元','艺徒','临时工','青海','全红总','郑州的名单','一根棍子','南京','专案组','学习班','广西来的人','工艺规程','以工代干','白卷','头上长角','前门和后门','一屋子材料','杭州','规章','七三开','三分'].includes(h)){ await bs[0].click(); await page.waitForTimeout(50); return pick(page,key); } }
   if(bs.length===1) return bs[0].click(); if(/弹弓|水箱/.test(key)) return;
-  { const h=await page.$eval('h2',h=>h.textContent); if(['吸收','两参一改三结合','公报','四十三亿美元'].includes(h)){ await bs[0].click(); await page.waitForTimeout(50); return pick(page,key); } }
   throw new Error('missing '+key+' at '+await page.$eval('h2',h=>h.textContent)+' | '+(await Promise.all(bs.map(b=>b.textContent()))).join(' / ').slice(0,300));
 }
 (async()=>{

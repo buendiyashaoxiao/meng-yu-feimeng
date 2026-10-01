@@ -7,8 +7,8 @@ async function pick(page, key){
   if(key==='@醒来'){ await page.click('#c-end'); return; }
   const btns = await page.$$('.choice[data-i]');
   for(const b of btns){ const t = await b.textContent(); if(t.includes(key)){ await b.click(); return; } }
+  { const h0=await page.evaluate(()=>document.querySelector('h2').textContent); if(['吸收','两参一改三结合','公报','四十三亿美元','艺徒','临时工','青海','全红总','郑州的名单','一根棍子','南京','专案组','学习班','广西来的人','工艺规程','以工代干','白卷','头上长角','前门和后门','一屋子材料','杭州','规章','七三开','三分'].includes(h0)){ await btns[0].click(); await page.waitForTimeout(50); return pick(page,key);} }
   if(btns.length===1) return btns[0].click(); if(/弹弓|水箱/.test(key)) return;
-  { const h0=await page.evaluate(()=>document.querySelector('h2').textContent); if(['吸收','两参一改三结合','公报','四十三亿美元'].includes(h0)){ await btns[0].click(); await page.waitForTimeout(50); return pick(page,key);} }
   const h = await page.evaluate(()=>document.querySelector('h2').textContent);
   throw new Error('no choice '+key+' at '+h+' options: '+(await Promise.all(btns.map(b=>b.textContent()))).join(' / '));
 }
