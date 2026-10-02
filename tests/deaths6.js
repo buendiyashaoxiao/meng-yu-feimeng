@@ -3,6 +3,7 @@ const FILE = 'file://' + require('path').resolve(__dirname, '..', '梦与非梦.
 const OUT = require('os').tmpdir() + '/';
 const pre = ['那天晚上','你以为','那天晚上你没睡着','十一月初','摆一摆','去北京','第一个走下去','留在座位','半夜里','拥护你的意见','带上十七厂','走上台','你们不听','#next','该说话','进楼','带头喊','靠着墙','跟耿金章去','开上午的会'];
 async function pick(page,key){
+  if(key!=='#next' && await page.evaluate(()=>String(window.__mfm.st.scene).startsWith('x_'))){ await page.click('.choice[data-i]'); return pick(page,key); }
   if(key==='#next') return page.click('#next');
   if(key==='@end'){ if(await page.$('#c-end')) return page.click('#c-end'); const h=await page.$eval('h2',h=>h.textContent); if(['吸收','两参一改三结合','公报','四十三亿美元','艺徒','临时工','青海','全红总','郑州的名单','一根棍子','南京','专案组','学习班','广西来的人','工艺规程','以工代干','白卷','头上长角','前门和后门','一屋子材料','杭州','规章','七三开','三分'].includes(h)){ const bs=await page.$$('.choice[data-i]'); await bs[0].click(); await page.waitForTimeout(50); return pick(page,key);} throw new Error('no end at '+h); }
   const bs = await page.$$('.choice[data-i]');

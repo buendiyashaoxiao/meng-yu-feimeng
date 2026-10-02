@@ -3,6 +3,7 @@ const FILE = 'file://' + require('path').resolve(__dirname, '..', '梦与非梦.
 const OUT = require('os').tmpdir() + '/';
 const base = ['那天晚上','你以为','那天晚上你没睡着','十一月初','不要司令','去北京','走下去','下车','半夜里','抽烟','留下来，跟黄金海','念一条宪法','抄在黑板上','#next','该说话','穿过人墙','第八十七条','靠着墙','先别冲','华山医院','签之前','让他们去北京','马天水的车','帽子','加一条','大楼不急','公社委员由工厂选','只守住','十二天以后'];
 async function pick(page, key){
+  if(key!=='#next' && await page.evaluate(()=>String(window.__mfm.st.scene).startsWith('x_'))){ await page.click('.choice[data-i]'); return pick(page,key); }
   if(key==='#next'){ await page.click('#next'); return; }
   if(key==='@醒来'){ await page.click('#c-end'); return; }
   const btns = await page.$$('.choice[data-i]');

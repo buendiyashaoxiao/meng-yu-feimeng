@@ -18,6 +18,7 @@ const routes = {
   starve:[...histA3,'主席让我读这个','你把选票塞进票箱，手很稳','去医院看周总理','北京现在大有','可以批判，允许','照着要点讲','一九七六年一月','@end','#next','加紧生产','加强战备','天亮以后','设。','拿上文件包','@end','#next','照着材料','你把笔放下'],
 };
 async function pick(page,key){
+  if(key!=='#next' && await page.evaluate(()=>String(window.__mfm.st.scene).startsWith('x_'))){ await page.click('.choice[data-i]'); return pick(page,key); }
   if(key==='#next') return page.click('#next');
   if(key==='@end'){ if(await page.$('#c-end')) return page.click('#c-end'); const h=await page.$eval('h2',h=>h.textContent); if(['吸收','两参一改三结合','公报','四十三亿美元','艺徒','临时工','青海','全红总','郑州的名单','一根棍子','南京','专案组','学习班','广西来的人','工艺规程','以工代干','白卷','头上长角','前门和后门','一屋子材料','杭州','规章','七三开','三分'].includes(h)){ const bs=await page.$$('.choice[data-i]'); await bs[0].click(); await page.waitForTimeout(50); return pick(page,key);} throw new Error('no end at '+h); }
   const bs = await page.$$('.choice[data-i]');
