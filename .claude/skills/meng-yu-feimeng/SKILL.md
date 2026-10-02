@@ -58,13 +58,14 @@ description: 在《梦与非梦》（王洪文视角的上海文革文字冒险�
   - `death:true` 是提前结束的局，必须有 `after`（后来）和 `verdict`（结论）。`end:true` 是一幕的结尾。
   - `ifend` 标 IF 线所属，`branch` 标跨幕延续的支线（k1 到 k6）。
 - **状态** `st`：facts、archive、log、last、path、cps、cp、told、startNote、branch、ifend。存在 localStorage 的 `mfm-state`、`mfm-dreams`、`mfm-ach`。
-- **回响** `ECHO[flag] = {fx, w:{voice, hand, clean, ladder}}`。每个 `set` 都要在 ECHO 里有一条，`fx` 是一句直接后果，`w` 是四项分量的增减。四项的名字是 放手（voice）、留情（hand）、不沾（clean）、向上靠（ladder），解释在 `GLOSS.ax_*`，`axLink()` 生成可点开的链接。
+- **回响** `ECHO[flag] = {fx, w:{voice, hand, clean, ladder}}`。每个 `set` 都要在 ECHO 里有一条，`fx` 是一句直接后果，`w` 是四项分量的增减。四项的名字是 放权（voice）、宽待（hand）、清白（clean）、听上面（ladder），解释在 `GLOSS.ax_*`，`axLink()` 生成可点开的链接。
 - **历史上的选择** `HX[scene]` 写这一步历史上的王洪文怎么做的，带出处。
-- **门** `DOORS` 和 `canA1`、`canA2`、`canA7`、`canA4`、`canSW`、`canD3`、`canC1` 等判断某条梦里的路开没开。种子是某个具体选择，开门要靠分量累积。`drifted()`（向上靠不到 8）决定第三幕末能不能进北京。
+- **门** `DOORS` 和 `canA1`、`canA2`、`canA7`、`canA4`、`canSW`、`canD3`、`canC1` 等判断某条梦里的路开没开。种子是某个具体选择，开门要靠分量累积。`drifted()`（听上面不到 8）决定第三幕末能不能进北京。
 - **结局与成就** `ENDINGS`（23 种）、`WCH`（16 种改变）、`COUPLE`（7 种组合）、`ACH`、`recordAch()`、`DOOR_REQ`（梦满三次后显示的开门条件）。
 - **从某一幕开始** `PRESETS`（五种人）、`simulate()`、`startFrom()`。改了前三幕的选项或分量以后，要跑 `tests/presetvals.js` 确认五种人都还能进北京、数值不过分偏。
 - **重新做梦** `redoList()` 给每一幕三个按钮：保留原来的（`restartAct`）、换一种人（`presetPanel`）、从头。
 - **人物卡** `CH`、`CH_ALSO`、`charExtra()`；术语 `GLOSS`；图 `FIG`；尾声 `EPI`。
+- **给新玩家的说明（1.6）** 新写一场时一并补上。`KNOWN[scene]` 正文下的“当时的人都知道”，一到三句；`OPTMEAN[set]` 选项下的小字，写这个做法在当时意味着什么，好选项也写代价；`PLAIN[glossKey]` 名词第一次出现时的白话；`ACTCAUSE[act]` 幕末页的历史因果和“接下来”；`DEATHWHY[scene]` 提前结束页的“为什么停在这里”和“历史上接下来”；`ROLES[glossKey]` 人名的头衔，按幕变；`ASKS` 让戏里的人问出来。说法要直接，解锁就写“解锁”，条件写成“宽待 ≥ 4”。
 - 调试入口 `window.__mfm`（SC、ECHO、HX、ax、st、start、sim）。
 
 ## 7. 改完以后
