@@ -5503,7 +5503,7 @@ function worldPeopleLines(w){
   return L.slice(0,5);
 }
 function worldPart2(w){
-  if(w.t==="W") return "《梦与非梦》第一部写到一九七八年十二月。你还在台上的世界线，第二部会从这里接着写（还没有写）。开局输入这串代码，还原的就是这一局的世界。最先压上来的是两件事，一千多万知青要回城，十几年没动过的工资。";
+  if(w.t==="W") return "《梦与非梦》第一部写到一九七八年十二月。你还在台上的世界线，第二部从这里接着写，一直写到一九八九年。开局输入这串代码，还原的就是这一局的世界。最先压上来的是两件事，一千多万知青要回城，十几年没动过的工资。";
   if(w.t==="X") return "这一局到这里结束，不接第二部。第二部只写你还在台上的世界线。";
   return "这一条世界线不接第二部，第二部只写你还在台上的世界线。这串代码记下的，是你留在那个时代里的东西。";
 }
@@ -5519,7 +5519,14 @@ function worldPanel(){
     <p>${worldOneLine(w)}</p>
     ${legacy?`<h4>这一局留下了什么</h4><ul>${legacy}</ul>`:""}
     ${ppl?`<h4>人在哪里</h4><ul>${ppl}</ul>`:""}
-    <p class="w2">${worldPart2(w)}</p></div>`;
+    <p class="w2">${worldPart2(w)}</p>${part2Link(w)}</div>`;
+}
+/* 第二部的入口：代码放在地址的 # 后面，第一部最后几场的选择用 x= 带过去（代码里没有这几位）。 */
+function part2Link(w){
+  if(!w || !(typeof onStageWorld==="function" ? onStageWorld(w) : w.t==="W")) return "";
+  const x = (st.facts||[]).filter(k=>/^(w1_|w2_|r1_|r2_|c1_|c2_|e6_)/.test(k));
+  const href = "梦与非梦_第二部.html#" + w.code + (x.length ? "&x=" + x.join(".") : "");
+  return `<p><a class="restart" href="${href}">进入第二部</a></p>`;
 }
 function bindWorld(){
   const b = document.getElementById("wcopy"), c = document.getElementById("wcode");
@@ -5875,9 +5882,9 @@ encodeWorld = function(){
   : old(w); }
 { const old = worldPart2; worldPart2 = w => !onStageWorld(w) ? old(w)
   : w.t==="W" ? old(w)
-  : w.t==="R" ? "《梦与非梦》第一部写到这里。第二部（还没有写）会从这里接着走。你在台上，可台上的风向在变。工作会议以后，邓小平和陈云的人越来越多，“两个凡是”的人会一个一个退下去。"+((has("r1_deng")||has("r2_deng")) && !has("r1_hua") && !has("r2_hua") ? "你已经坐到了邓小平那几排，华国锋那边记着这件事，工会还在你手里。" : (has("r1_hua")||has("r2_hua")) ? "你坐在华国锋这一边，可这一边的人越来越少。" : "你要决定，跟着华国锋，还是去找邓小平，或者守着工会。")
-  : w.t==="C" ? "《梦与非梦》第一部写到这里。第二部（还没有写）会从这里接着走。张春桥要继续革命，华国锋要四个现代化，老干部等着邓小平。你坐在中间，每一次表决都可能是最后一次。"
-  : "《梦与非梦》第一部写到这里。第二部（还没有写）会从这里接着走。你不在政治局，可你在全总。十七厂的人会来问你，工会能不能管住房、管调资、管厂长。"; }
+  : w.t==="R" ? "《梦与非梦》第一部写到这里。第二部从这里接着走，写到一九八九年。你在台上，可台上的风向在变。工作会议以后，邓小平和陈云的人越来越多，“两个凡是”的人会一个一个退下去。"+((has("r1_deng")||has("r2_deng")) && !has("r1_hua") && !has("r2_hua") ? "你已经坐到了邓小平那几排，华国锋那边记着这件事，工会还在你手里。" : (has("r1_hua")||has("r2_hua")) ? "你坐在华国锋这一边，可这一边的人越来越少。" : "你要决定，跟着华国锋，还是去找邓小平，或者守着工会。")
+  : w.t==="C" ? "《梦与非梦》第一部写到这里。第二部从这里接着走，写到一九八九年。张春桥要继续革命，华国锋要四个现代化，老干部等着邓小平。你坐在中间，每一次表决都可能是最后一次。"
+  : "《梦与非梦》第一部写到这里。第二部从这里接着走，写到一九八九年。你不在政治局，可你在全总。十七厂的人会来问你，工会能不能管住房、管调资、管厂长。"; }
 { const old = worldPanel; worldPanel = function(){
     const h = old(); const w = st.world; if(!w || !w.stage) return h;
     const lab = ["","在台上","靠边","被抓"];
@@ -6483,7 +6490,7 @@ if(window.claude && window.claude.hot && window.claude.hot.snapshot){
   try{ window.claude.hot.snapshot(()=>({st})) }catch(e){}
 }
 render();
-window.__mfm = {SC, ECHO, HX, gloss, KNOWN, ACTCAUSE, PLAIN, OPTMEAN, ax, rel, oct6, RELW, start:startDream, sim:simulate, encodeWorld, decodeWorld, worldStart, worldNow, WFACTS, WDIMS, WPEOPLE, get st(){ return st; }};
+window.__mfm = {SC, ECHO, HX, gloss, KNOWN, ACTCAUSE, PLAIN, OPTMEAN, ax, rel, oct6, RELW, start:startDream, sim:simulate, encodeWorld, decodeWorld, worldStart, worldNow, WFACTS, WDIMS, WPEOPLE, go:(...a)=>go(...a), get st(){ return st; }};
 })();
 </script>
 
