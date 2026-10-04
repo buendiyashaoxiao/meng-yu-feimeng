@@ -25,3 +25,5 @@ CHROME_PATH=/path/to/chromium node tests/walk.js 20
 ```
 node -e "const h=require('fs').readFileSync('梦与非梦.html','utf8');const m=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)];new Function(m[m.length-1][1]);console.log('ok')"
 ```
+
+英文版 `梦与非梦_en.html` 用同样的脚本测：把脚本里的文件名换成 `梦与非梦_en.html` 另存一份再跑（`walk.js`、`worldcode.js`、`endings.js` 不依赖中文文字，可以直接这样用；`undo.js` 按中文选项文字点，不能直接用）。

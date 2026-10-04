@@ -1,0 +1,1 @@
+{ "name": "mfm-en", "private": true, "description": "英文版第一部的生成工具", "dependencies": { "acorn": "^8.11.0", "acorn-walk": "^8.3.0" } }

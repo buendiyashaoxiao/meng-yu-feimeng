@@ -67,6 +67,7 @@ description: 在《梦与非梦》（王洪文视角的上海文革文字冒险�
 - **人物卡** `CH`、`CH_ALSO`、`charExtra()`；术语 `GLOSS`；图 `FIG`；尾声 `EPI`。
 - **给新玩家的说明（1.6）** 新写一场时一并补上。`KNOWN[scene]` 正文下的“当时的人都知道”，一到三句；`OPTMEAN[set]` 选项下的小字，写这个做法在当时意味着什么，好选项也写代价；`PLAIN[glossKey]` 名词第一次出现时的白话；`ACTCAUSE[act]` 幕末页的历史因果和“接下来”；`DEATHWHY[scene]` 提前结束页的“为什么停在这里”和“历史上接下来”；`ROLES[glossKey]` 人名的头衔，按幕变；`ASKS` 让戏里的人问出来。说法要直接，解锁就写“解锁”，条件写成“宽待 ≥ 4”。
 - **第二部** 在 `梦与非梦_第二部.html`，设计见 `docs/第二部设计.md`。卡 `CARDS2`、词条 `GLOSS2`、结局 `ENDINGS2` 在第一个 `<script>`，文字可以是字符串、`{W,R,C,G,_}` 或 `[[条件,文字],…]`。条件里用 `has() d() f() pos last ind() real()`。改完跑 `node tests/part2.js 40` 和 `node tests/part2link.js`。第一部结局页“进入第二部”的链接由 `part2Link()` 生成，代码之外的几项选择用 `&x=` 带过去。
+- **英文版** `梦与非梦_en.html` 是生成的，不要手改。改了第一部的中文以后，在 `tools/en/` 里跑 `npm i`（第一次）和 `node build_en.js`。它会报 untranslated（新的或改过的中文串），把这些译好补进 `out/` 里对应的块（或者新开一块，格式同 `chunks/`，用 `check.js` 校验），再跑一次。代码里拿中文做判断的地方（正则、`.replace("中文", …)`、对象的中文键）要在 `build_en.js` 的补丁里对应改，构建时会报 PATCH MISS 和 needle missing。
 - 调试入口 `window.__mfm`（SC、ECHO、HX、ax、st、start、sim）。
 
 ## 7. 改完以后
