@@ -1,32 +1,27 @@
-// 生成英文版第一部：node build_en.js
-const fs=require("fs"),acorn=require("acorn"),walk=require("acorn-walk");
+// 把英文版装进 梦与非梦.html：node build_en.js
+// 中文主脚本在 <script type="text/plain" id="main-zh">，这里生成 id="main-en" 那一份和英文照片说明，
+// 再放一段 boot 脚本：按 localStorage 的 mfm-lang（或地址里的 ?lang=en）挑一份执行。右上角按钮切换。
+const fs=require("fs"),path=require("path"),acorn=require("acorn"),walk=require("acorn-walk");
 const {units,rebuild}=require("./extract.js"),{loadMap}=require("./loadmap.js");
-const path=require("path"); process.chdir(__dirname); const ROOT=path.resolve(__dirname,"../..");
-const h=fs.readFileSync(ROOT+"/梦与非梦.html","utf8");
+process.chdir(__dirname); const ROOT=path.resolve(__dirname,"../.."), FILE=ROOT+"/梦与非梦.html";
+let h=fs.readFileSync(FILE,"utf8");
 const map=loadMap("chunks","out");
-// 几条补译
-const extra={"、":", ","？？？":"???","，":", "};
-const titleOld=[...map.keys()].find(s=>s.includes("<h1>梦与非梦<small>"));
-const extraMissing=JSON.parse(fs.readFileSync("miss1.json","utf8"));
-for(const {src} of extraMissing){
-  if(src.includes('<span class="lishu"')){
-    let t=map.get(titleOld).replace(/⟦2⟧/g,"⟦3⟧").replace(/⟦1⟧/g,"⟦2⟧");
-    t=t.replace("<h1>Dream and Not Dream<small>",'<h1><span class="en-title">Dream and Not Dream</span><span hidden>⟦1⟧</span><small>');
-    extra[src]=t;
-  } else if(!(src in extra)) extra[src]=src.replace(/、/g,",");
-}
+const extra=JSON.parse(fs.readFileSync("extra_en.json","utf8"));   // 补译：后来新加或改过的中文串
 const tr=s=>map.has(s)?map.get(s):(s in extra?extra[s]:null);
 
-const m=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)]; const last=m[m.length-1]; const code=last[1];
+const mz=h.match(/<script type="text\/plain" id="main-zh">([\s\S]*?)<\/script>/); if(!mz) throw new Error("找不到 main-zh");
+const code=mz[1];
 const us=units(code); const log=[];
 let out=rebuild(code,us,tr,log);
 if(log.length) console.log("rebuild log",log.slice(0,10));
-const left=[...new Set(us.filter(u=>tr(u.src)==null).map(u=>u.src))]; if(left.length) console.log("untranslated",left.length,left.slice(0,5));
+const left=[...new Set(us.filter(u=>tr(u.src)==null).map(u=>u.src))];
+fs.writeFileSync("untranslated.json",JSON.stringify(left,null,1));
+if(left.length) console.log("untranslated",left.length,"（写在 untranslated.json，译好放进 extra_en.json）");
 
-// 检查 .replace("a","b") 这类在译文里还找得到
-{ const ast=acorn.parse(code,{ecmaVersion:"latest"}); const all=[...map.values()].join("\n");
+// .replace("中文", …) 这类：译文里得找得到被替换的那一句
+{ const ast=acorn.parse(code,{ecmaVersion:"latest"}); const all=[...map.values(),...Object.values(extra)].join("\n");
   walk.fullAncestor(ast,(n,anc)=>{ const p=anc[anc.length-2];
-    if(n.type==="Literal"&&typeof n.value==="string"&&/[一-鿿]/.test(n.value)&&p&&p.type==="CallExpression"&&p.arguments[0]===n&&p.callee.property&&["replace","includes","indexOf","split","startsWith"].includes(p.callee.property.name)){
+    if(n.type==="Literal"&&typeof n.value==="string"&&/[一-鿿。]/.test(n.value)&&p&&p.type==="CallExpression"&&p.arguments[0]===n&&p.callee.property&&["replace","includes","indexOf","split","startsWith"].includes(p.callee.property.name)){
       const t=tr(n.value); if(t && !all.includes(t)) console.log("needle missing:",n.value,"=>",t); } }); }
 
 // 代码里跟中文写死的几处
@@ -42,32 +37,52 @@ P('if(/^[，,]?(是|，是)|^(当了|当上|任|出任)/.test(','if(/^\\s*,?\\s*
 P('/、$/.test(plain)','/,\\s*$/.test(plain)');
 P('GLOSS[k].t.replace(/（.*?）/,"")','GLOSS[k].t.replace(/\\s*[（(].*?[）)]/,"")');
 P('E.nextLabel.replace(/^第.幕　/,"")','E.nextLabel.replace(/^Act \\w+　/,"")');
+P('const km = {"上海":0,"南翔":20,"安亭":37,"昆山":50,"苏州":85,"无锡":126,"常州":165,"镇江":237,"南京":303};','const km = {"Shanghai":0,"Nanxiang":20,"Anting":37,"Kunshan":50,"Suzhou":85,"Wuxi":126,"Changzhou":165,"Zhenjiang":237,"Nanjing":303};');
+P('`Dream of Anting number <b>${Math.max(dreamCount,1)}</b>`','`Anting, dream no. <b>${Math.max(dreamCount,1)}</b>`');
+P('.replace(/图中只画出十一辆，是示意。/, "")','.replace(/ ?Only 11 trucks are drawn, as a sketch\\./, "")');
+P('.replace(/建筑样子为游戏插画。/, "")','.replace(/ ?The building is a game illustration\\./, "")');
 // 存档分开，免得中文存档里的文字混进英文版
 P('const SAVE_KEY = "mfm-state", DREAM_KEY = "mfm-dreams", THEME_KEY = "mfm-theme";','const SAVE_KEY = "mfm-en-state", DREAM_KEY = "mfm-en-dreams", THEME_KEY = "mfm-theme";');
 P('"mfm-ach"','"mfm-en-ach"'); P('"mfm-undo"','"mfm-en-undo"'); P('const ARREST_KEY = "mfm-arrested"','const ARREST_KEY = "mfm-en-arrested"');
-P('const km = {"上海":0,"南翔":20,"安亭":37,"昆山":50,"苏州":85,"无锡":126,"常州":165,"镇江":237,"南京":303};','const km = {"Shanghai":0,"Nanxiang":20,"Anting":37,"Kunshan":50,"Suzhou":85,"Wuxi":126,"Changzhou":165,"Zhenjiang":237,"Nanjing":303};');
-P('`Dream of Anting number <b>${Math.max(dreamCount,1)}</b>`','`Anting, dream no. <b>${Math.max(dreamCount,1)}</b>`');
-// 第二部还只有中文
+const cjk=(out.replace(/\/\*[\s\S]*?\*\//g,"").replace(/[（(]《[^》]*》[）)]|《[^》]*》|〈[^〉]*〉/g,"").match(/[一-鿿]/g)||[]).length;
+console.log("英文脚本里剩下的汉字（去掉注释和书名）", cjk);
 
-
-// 拼回去
-let html=h.slice(0,last.index)+"<script>"+out+"</script>"+h.slice(last.index+last[0].length);
-// 脚本外面的中文
-const R=(a,b)=>{ if(!html.includes(a)){ console.log("HTML MISS",a.slice(0,60)); return; } html=html.split(a).join(b); };
-R('<html lang="zh-CN"','<html lang="en"');
-R('<title>梦与非梦</title>','<title>Dream and Not Dream</title>');
-R('<span id="actname">梦与非梦</span>','<span id="actname">Dream and Not Dream</span>');
-R('<a class="hbtn lang" href="梦与非梦_en.html">English</a>','<a class="hbtn lang" href="梦与非梦.html" lang="zh">中文</a>');
-R('>主题 自动</button>','>Theme Auto</button>');
-R('aria-label="词条"','aria-label="Glossary"'); R('aria-label="关闭">关闭</button>','aria-label="Close">Close</button>');
-R('aria-label="放大查看"','aria-label="Enlarged view"'); R('<span>可以左右拖动查看</span>','<span>Drag sideways to see more</span>');
-R('id="lb-x">关闭</button>','id="lb-x">Close</button>');
-R('content:"解锁的路径　历史上没有"','content:"Unlocked path　Did not happen in history"');
-R('.hero h1 small{color:#e3dccb;font-family:var(--sans);letter-spacing:.3em}','.hero h1 small{color:#e3dccb;font-family:var(--sans);letter-spacing:.06em}');
-R('.hero h1 small{','.hero h1 .en-title{display:block;font-family:var(--serif);font-weight:700;letter-spacing:.02em;font-size:.72em;line-height:1.05}\n.hero h1 small{');
 // 照片说明
 const PH=JSON.parse(fs.readFileSync("photos_en.json","utf8"));
-html=html.replace(/(<script type="application\/json" id="photos">)([\s\S]*?)(<\/script>)/,(_,a,b,c)=>{ const d=JSON.parse(b);
-  for(const k in d){ const e=PH[k]; if(!e){ console.log("photo missing",k); continue; } Object.assign(d[k],e); } return a+JSON.stringify(d)+c; });
-fs.writeFileSync(ROOT+"/梦与非梦_en.html",html);
-const left2=(out.match(/[一-鿿]/g)||[]).length; console.log("written; CJK chars left in code", left2);
+const zhPhotos=JSON.parse(h.match(/<script type="application\/json" id="photos">([\s\S]*?)<\/script>/)[1]);
+for(const k in zhPhotos) if(!PH[k]) console.log("照片没有英文说明",k);
+const phEn=JSON.stringify(PH);
+
+const BOOT=`<script id="boot">
+/* 语言：zh 或 en。按钮切换以后存进 localStorage 再刷新。 */
+(()=>{
+  let L = "zh";
+  try{ L = new URLSearchParams(location.search).get("lang") || localStorage.getItem("mfm-lang") || "zh"; }catch(e){}
+  const en = document.getElementById("main-en");
+  if(L!=="en" || !en || !en.textContent.trim()) L = "zh";
+  const $ = s => document.querySelector(s);
+  if(L==="en"){
+    document.documentElement.lang = "en"; document.title = "Dream and Not Dream";
+    $("#actname").textContent = "Dream and Not Dream";
+    $("#sheet").setAttribute("aria-label","Glossary"); $("#sheet .x").textContent = "Close"; $("#sheet .x").setAttribute("aria-label","Close");
+    $("#lightbox").setAttribute("aria-label","Enlarged view"); $("#lightbox .lb-bar span").textContent = "Drag sideways to see more"; $("#lb-x").textContent = "Close";
+    try{ const ph = $("#photos"), zh = JSON.parse(ph.textContent), add = JSON.parse($("#photos-en").textContent);
+      for(const k in zh) if(add[k]) Object.assign(zh[k], add[k]); ph.textContent = JSON.stringify(zh); }catch(e){}
+  }
+  const b = $("#lang");
+  if(b){ b.textContent = L==="en" ? "中文" : "English"; b.lang = L==="en" ? "zh" : "en";
+    b.onclick = () => { try{ localStorage.setItem("mfm-lang", L==="en" ? "zh" : "en"); }catch(e){}
+      const u = new URL(location.href); u.searchParams.delete("lang"); location.replace(u.toString()); }; }
+  const s = document.createElement("script"); s.textContent = document.getElementById("main-"+L).textContent; document.body.appendChild(s);
+})();
+</script>`;
+const safe=x=>x.replace(/<\/script/gi,"<\\/script");
+const ENBLOCK=`<script type="text/plain" id="main-en">${safe(out)}</script>\n<script type="application/json" id="photos-en">${safe(phEn)}</script>\n${BOOT}`;
+// 去掉旧的，再接在 main-zh 后面
+h=h.replace(/\n?<script type="text\/plain" id="main-en">[\s\S]*?<\/script>\n<script type="application\/json" id="photos-en">[\s\S]*?<\/script>\n<script id="boot">[\s\S]*?<\/script>/,"");
+const end=h.indexOf("</script>",h.indexOf('id="main-zh"'))+9;
+h=h.slice(0,end)+"\n"+ENBLOCK+h.slice(end);
+if(!h.includes('html[lang="en"] .choice.grown::before'))
+  h=h.replace("</style>",'html[lang="en"] .choice.grown::before{content:"Unlocked path　Did not happen in history"}\nhtml[lang="en"] .hero h1 .en-title{display:block;font-family:var(--serif);font-weight:700;letter-spacing:.02em;font-size:.5em;line-height:1.1;margin-top:.15em}\nhtml[lang="en"] .hero h1 small{letter-spacing:.06em}\n</style>');
+fs.writeFileSync(FILE,h);
+console.log("写好了", FILE, Math.round(h.length/1024)+"K 字符");

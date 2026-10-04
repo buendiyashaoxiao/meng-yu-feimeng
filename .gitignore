@@ -1,1 +1,5 @@
 tools/en/node_modules/
+tools/en/untranslated.json
+tools/img/*_src.png
+tools/img/*.jpg
+tools/img/ai_imgs.json

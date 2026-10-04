@@ -16,14 +16,12 @@ CHROME_PATH=/path/to/chromium node tests/walk.js 20
 | `ifpath3.js` | 走几条 IF 线到尾声，打印每一场的标题，用来查跨幕延续和尾声分线。 |
 | `start2.js` | 标题页“从某一幕开始”，选第五幕和“心软的调停者”，打印预览和进入后的场景，再走到底。改脚本里的幕和人可以测别的组合。 |
 | `presetvals.js` | 打印五种人走到各幕时的四项分量，用来调平衡。 |
-| `part2.js [N]` | 第二部：四种示例开局各随机走 N 局，查报错、空文字、结局分布和 1989 年的数字。N 默认 40，100 局约一分钟。 |
-| `part2link.js` | 把第一部摆到继续革命、华国锋的格局、共治的结局页，看有没有“进入第二部”，点进去能不能开局。 |
 | `feat.js` | 按指定的选项走到某个结局或提前结束的局，再看结局页和成就记录。 |
 
 语法快检，不开浏览器：
 
 ```
-node -e "const h=require('fs').readFileSync('梦与非梦.html','utf8');const m=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)];new Function(m[m.length-1][1]);console.log('ok')"
+node tests/syntax.js
 ```
 
-英文版 `梦与非梦_en.html` 用同样的脚本测：把脚本里的文件名换成 `梦与非梦_en.html` 另存一份再跑（`walk.js`、`worldcode.js`、`endings.js` 不依赖中文文字，可以直接这样用；`undo.js` 按中文选项文字点，不能直接用）。
+英文版在同一个文件里，地址后面加 `?lang=en` 打开就是英文。上面的脚本把 FILE 改成 `'file://…/梦与非梦.html?lang=en'` 另存一份就能测英文（`walk.js`、`worldcode.js`、`endings.js` 不依赖中文文字；`undo.js` 按中文选项文字点，不能直接用）。
